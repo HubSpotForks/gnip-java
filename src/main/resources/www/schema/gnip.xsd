@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="activities">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="activity" maxOccurs="unbounded" minOccurs="0" type="activityType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="activity" type="activityType"/>
+
+    <xs:element name="collection">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="uid" maxOccurs="unbounded" minOccurs="0" type="uidType"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="uriSafe" use="required"/>
+            <xs:attribute name="postUrl" type="xs:anyURI" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="publishers">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="publisher" maxOccurs="unbounded" minOccurs="0" type="publisherType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="publisher" type="publisherType"/>
+
+    <xs:element name="uid" type="uidType"/>
+
+    <xs:complexType name="activityType">
+        <xs:attribute name="at" type="xs:dateTime" use="required"/>
+        <xs:attribute name="uid" type="xs:string" use="required"/>
+        <xs:attribute name="type" type="xs:string" use="required"/>
+        <xs:attribute name="guid" type="xs:string" use="optional"/>
+        <xs:attribute name="publisher.name" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="publisherType">
+        <xs:attribute name="name" type="uriSafe" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="uidType">
+        <xs:attribute name="name" use="required"/>
+        <xs:attribute name="publisher.name" type="uriSafe" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="uriSafe">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-z0-9.+-]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
