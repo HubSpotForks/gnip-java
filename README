@@ -1,0 +1,30 @@
+Welcome to the Java client library for Gnip!
+
+This Java API provides easy access to Gnip for Java developers.  
+
+To build the library, run:
+
+  mvn compile
+
+To test the library, create the file:
+
+  src/test/resources/test.properties
+
+which holds the username, password, and host properties used to
+connect to Gnip.  This file should be of the format:
+
+gnip.username=darthvader
+gnip.password=goempire
+gnip.host=https://s.gnipcentral.com
+
+To test the library, run:
+
+  mvn test
+
+To package the library, run:
+
+  mvn package
+
+To clean the library, run:
+
+  mvn clean
