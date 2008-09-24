@@ -19,21 +19,29 @@ public class HTTPConnection {
 
     public InputStream doGet(String urlString) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, Method.GET);
+        System.out.printf("HTTP GET to %s\n", urlString);
         return getData(urlConnection);
     }
 
     public InputStream doPost(String urlString, byte[] data) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, Method.POST);
+        System.out.printf("HTTP POST to %s\n", urlString);
+        if(!config.useGzip())
+            System.out.printf("with data \n%s\n", new String(data));
         return transferData(data, urlConnection);
     }
 
     public InputStream doPut(String urlString, byte[] data) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, Method.PUT);
+        System.out.printf("HTTP PUT to %s", urlString);
+        if(!config.useGzip())
+            System.out.printf("with data\n%s\n", new String(data));
         return transferData(data, urlConnection);
     }
 
     public InputStream doDelete(String urlString) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, Method.DELETE);
+        System.out.printf("HTTP DELETE to %s\n", urlString);
         return getData(urlConnection);
     }
 
