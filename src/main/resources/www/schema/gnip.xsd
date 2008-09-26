@@ -1,58 +1,140 @@
 <?xml version="1.0" encoding="UTF-8" ?>
+
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+    <!-- Root element of representations a set of activities. -->
     <xs:element name="activities">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="activity" maxOccurs="unbounded" minOccurs="0" type="activityType"/>
+                <xs:element ref="activity" maxOccurs="unbounded" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="publisher" type="uriSafeType" use="optional"/>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="activity" type="activityType"/>
-
-    <xs:element name="collection">
+    <!-- Root element of representations of a single filter. -->
+    <xs:element name="filter">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="uid" maxOccurs="unbounded" minOccurs="0" type="uidType"/>
+                <xs:choice minOccurs="0" maxOccurs="1">
+                    <xs:element name="postUrl" type="xs:anyURI"/>
+                    <xs:element name="jid" type="xs:string"/>
+                </xs:choice>
+                <xs:element ref="rule" maxOccurs="unbounded" minOccurs="1"/>
             </xs:sequence>
-            <xs:attribute name="name" type="uriSafe" use="required"/>
-            <xs:attribute name="postUrl" type="xs:anyURI" use="optional"/>
+            <xs:attribute name="name" type="uriSafeType" use="required"/>
+            <xs:attribute name="fullData" type="xs:boolean" use="required"/>
         </xs:complexType>
     </xs:element>
 
+    <!-- Root element of representations of a set of publishers. -->
     <xs:element name="publishers">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="publisher" maxOccurs="unbounded" minOccurs="0" type="publisherType"/>
+                <xs:element ref="publisher" maxOccurs="unbounded" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="publisher" type="publisherType"/>
+    <!-- Root element of representations of a set of filters. -->
+    <xs:element name="filters">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="filter" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
-    <xs:element name="uid" type="uidType"/>
+    <!-- Root element of Error responses from Gnip.  A human readable
+    description of the problem will be in the text node contained by
+    this element -->
+    <xs:element name="error" type="xs:string"/>
 
-    <xs:complexType name="activityType">
-        <xs:attribute name="at" type="xs:dateTime" use="required"/>
-        <xs:attribute name="uid" type="xs:string" use="required"/>
-        <xs:attribute name="type" type="xs:string" use="required"/>
-        <xs:attribute name="guid" type="xs:string" use="optional"/>
-        <xs:attribute name="publisher.name" type="xs:string" use="optional"/>
-    </xs:complexType>
+    <!-- Root element of activityStream representations -->
+    <xs:element name="activityStream">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="activitiesAddedAt" type="optionalTimeStampType"/>
+                <xs:element name="buckets">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="bucket" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:attribute name="href" type="xs:anyURI"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
-    <xs:complexType name="publisherType">
-        <xs:attribute name="name" type="uriSafe" use="required"/>
-    </xs:complexType>
+    <xs:simpleType name="optionalTimeStampType">
+        <xs:union memberTypes="xs:dateTime">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="0"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
 
-    <xs:complexType name="uidType">
-        <xs:attribute name="name" use="required"/>
-        <xs:attribute name="publisher.name" type="uriSafe" use="required"/>
-    </xs:complexType>
+    <xs:element name="activity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="payload" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="body" type="xs:normalizedString"/>
+                            <xs:element name="raw" type="xs:base64Binary" minOccurs="0" maxOccurs="1"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="at" type="xs:dateTime" use="required"/>
+            <xs:attribute name="actor" type="xs:string" use="required"/>
+            <xs:attribute name="action" type="xs:string" use="required"/>
+            <xs:attribute name="url" type="xs:anyURI" use="optional"/>
+            <xs:attribute name="to" type="xs:string" use="optional"/>
+            <xs:attribute name="regarding" type="xs:string" use="optional"/>
+            <xs:attribute name="source" type="xs:string" use="optional"/>
+            <xs:attribute name="tags" type="csvType" use="optional"/>
+        </xs:complexType>
+    </xs:element>
 
-    <xs:simpleType name="uriSafe">
+    <xs:element name="publisher">
+        <xs:complexType>
+            <xs:attribute name="name" type="uriSafeType" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="rule">
+        <xs:complexType>
+            <xs:attribute name="type" use="required" type="ruleType"/>
+            <xs:attribute name="value" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="uriSafeType">
         <xs:restriction base="xs:string">
-            <xs:pattern value="[A-z0-9.+-]+"/>
+            <xs:pattern value="[A-z0-9.+\-]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="csvType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([^,]+,?)+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ruleType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="actor"/>
+            <xs:enumeration value="tag"/>
+            <xs:enumeration value="to"/>
+            <xs:enumeration value="regarding"/>
+            <xs:enumeration value="source"/>
         </xs:restriction>
     </xs:simpleType>
 </xs:schema>

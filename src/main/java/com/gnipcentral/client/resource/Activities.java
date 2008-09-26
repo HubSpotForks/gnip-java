@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-        "activities"
-        })
+@XmlType(name = "", propOrder = {"activities"})
 @XmlRootElement(name = "activities")
 public class Activities implements Resource {
 
     @XmlElement(name = "activity", required = false, type = Activity.class)
-    protected List<Activity> activities;
+    private List<Activity> activities;
 
     public List<Activity> getActivities() {
         if (activities == null) {

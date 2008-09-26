@@ -8,11 +8,12 @@ import javax.xml.bind.annotation.*;
 public class Publisher implements Resource {
 
     @XmlAttribute(required = true)
-    protected String name;
+    @XmlSchemaType(name = "uriTypeSafe")    
+    private String name;
 
-    //for jaxb
     @SuppressWarnings({"UnusedDeclaration"})
     private Publisher() {
+        // empty constructor for jaxb
     }
 
     public Publisher(String name) {

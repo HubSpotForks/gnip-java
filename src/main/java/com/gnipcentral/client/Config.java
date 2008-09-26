@@ -3,7 +3,8 @@ package com.gnipcentral.client;
 import java.net.URL;
 
 public class Config {
-    private boolean useGzip = true;
+
+    private boolean useGzip = false;
     private String username;
     private String password;
     private String gnipServer;
@@ -20,14 +21,14 @@ public class Config {
         this.gnipServer = gnipServer.toString();
     }
 
-    public void setUseGzip(boolean useGzip) {
-        this.useGzip = useGzip;
-    }
-
-    public boolean useGzip() {
+    public boolean isUseGzip() {
         return useGzip;
     }
 
+    public void setUseGzip(boolean useGzip) {
+        this.useGzip = useGzip;
+    }
+    
     public String getUsername() {
         return username;
     }

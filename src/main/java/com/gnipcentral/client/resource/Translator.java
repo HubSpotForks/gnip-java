@@ -18,7 +18,7 @@ public class Translator {
 
     static {
         try {
-            context = JAXBContext.newInstance(Activities.class, Activity.class, Publishers.class, Publisher.class, Collection.class, Uid.class);
+            context = JAXBContext.newInstance(Activities.class, Activity.class, Publishers.class, Publisher.class, Filter.class, Rule.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -36,8 +36,8 @@ public class Translator {
         return (Activities) getUnmarshaller().unmarshal(input);
     }
 
-    public static Collection parseCollection(InputSource input) throws JAXBException {
-        return (Collection) getUnmarshaller().unmarshal(input);
+    public static Filter parseFilter(InputSource input) throws JAXBException {
+        return (Filter) getUnmarshaller().unmarshal(input);
     }
 
     public static Publisher parsePublisher(InputSource input) throws JAXBException {

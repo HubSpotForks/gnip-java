@@ -17,7 +17,7 @@ public class GnipSchema {
             InputStream gnipSchema = Thread.currentThread().getContextClassLoader().getResourceAsStream("www/schema/gnip.xsd");
             schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(new StreamSource(gnipSchema));
         } catch (SAXException e) {
-            throw new RuntimeException("Can't find the schema " + e);
+            throw new RuntimeException("Unable to find the Gnip schema." + e, e);
         }
     }
 }

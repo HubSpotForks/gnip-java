@@ -8,7 +8,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.nio.charset.Charset;
 
-
 public abstract class BaseTestCase extends TestCase {
 
 

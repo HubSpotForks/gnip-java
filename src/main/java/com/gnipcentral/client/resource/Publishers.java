@@ -10,7 +10,7 @@ import java.util.List;
 public class Publishers implements Resource {
 
     @XmlElement(name = "publisher", required = true, type = Publisher.class)
-    protected List<Publisher> publishers;
+    private List<Publisher> publishers;
 
     public Publishers() {
     }

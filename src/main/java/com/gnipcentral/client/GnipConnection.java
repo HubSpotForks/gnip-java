@@ -6,12 +6,15 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.xml.sax.InputSource;
 
-import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.zip.GZIPOutputStream;
+import javax.xml.bind.JAXBException;
 
 public class GnipConnection {
+
+    private static final long FIVE_MINUTES = 60000;
+    
     private final HTTPConnection connection;
     private final Config config;
 
@@ -20,86 +23,196 @@ public class GnipConnection {
         this.config = config;
     }
 
-    public void create(Publisher publisher) throws JAXBException, IOException {
-        byte[] data = getData(publisher);
-        connection.doPost(getPublishersURL(), data);
+    public void create(Publisher publisher) throws GnipException {
+        try {
+            byte[] data = getData(publisher);
+            connection.doPost(getPublishersURL(), data);
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred creating Publisher", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred creating Publisher", e);
+        }
     }
 
-    public void create(Collection collection) throws JAXBException, IOException {
-        byte[] data = getData(collection);
-        connection.doPost(getCollectionsURL(), data);
+    public void create(Publisher publisher, Filter filter) throws GnipException {
+        try {
+            byte[] data = getData(filter);
+            connection.doPost(getFilterCreateURL(publisher.getName()), data);
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred creating Filter", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred creating Filter", e);
+        }
+
     }
 
-    public void create(Collection collection, Uid uid) throws JAXBException, IOException {
-        byte[] data = getData(uid);
-        connection.doPost(getUidsURL(collection), data);
+    public Publishers getPublishers() throws GnipException {
+        try {
+            InputStream response = connection.doGet(getPublishersURL() + ".xml");
+            return Translator.parsePublishers(new InputSource(response));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting Publishers", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting Publishers", e);
+        }
     }
 
-    public Publisher getPublisher(String publisherName) throws JAXBException, IOException {
-        InputStream response = connection.doGet(getPublisherURL(publisherName));
-        return Translator.parsePublisher(new InputSource(response));
+    public Publisher getPublisher(String publisherName) throws GnipException {
+        try {
+            InputStream response = connection.doGet(getPublisherURL(publisherName));
+            return Translator.parsePublisher(new InputSource(response));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting Publisher", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting Publisher", e);
+        }
+
     }
 
-    public Publishers getPublishers() throws JAXBException, IOException {
-        InputStream response = connection.doGet(getPublishersURL() + ".xml");
-        return Translator.parsePublishers(new InputSource(response));
+    public Filter getFilter(String publisherName, String filterName) throws GnipException {
+        try {
+            InputStream response = connection.doGet(getFilterURL(publisherName, filterName));
+            return Translator.parseFilter(new InputSource(response));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting Filter", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting Filter", e);
+        }
     }
 
-    public Collection getCollection(String collectionName) throws JAXBException, IOException {
-        InputStream response = connection.doGet(getCollectionURL(collectionName));
-        return Translator.parseCollection(new InputSource(response));
+    public void update(Publisher publisher, Filter filter) throws GnipException {
+        try {
+            byte[] data = getData(filter);
+            connection.doPut(getFilterURL(publisher, filter), data);
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred updating Filter", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred updating Filter", e);
+        }
     }
 
-    public void update(Collection collection) throws JAXBException, IOException {
-        byte[] data = getData(collection);
-        connection.doPut(getURL(collection), data);
+    public void update(Publisher publisher, Filter filter, Rule rule) throws GnipException {
+        try {
+            byte[] data = getData(rule);
+            connection.doPost(getRulesURL(publisher.getName(), filter.getName()), data);
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred updating Rule", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred updating Rule", e);
+        }
     }
 
-    public void delete(Collection collection) throws IOException {
-        connection.doDelete(getURL(collection));
+    public void delete(Publisher publisher, Filter filter) throws GnipException {
+        try {
+            connection.doDelete(getFilterURL(publisher, filter));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred deleting Filter", e);
+        }
     }
 
-    public void delete(Collection collection, Uid uid) throws JAXBException, IOException {
-        connection.doDelete(getUidsURL(collection, uid));
+    public void delete(Publisher publisher, Filter filter, Rule rule) throws GnipException {
+        try {
+            connection.doDelete(getRulesDeleteURL(publisher, filter, rule));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred deleting Rule", e);
+        }
     }
 
-    public void publish(Publisher publisher, Activities activities) throws JAXBException, IOException {
-        if (activities == null || activities.getActivities().isEmpty()) return;
-        byte[] data = getData(activities);
-        connection.doPost(getActivitiesPublishURL(publisher), data);
+    public void publish(Publisher publisher, Activities activities) throws GnipException {
+        if (activities == null || activities.getActivities().isEmpty())
+            return;
+
+        try {
+            byte[] data = getData(activities);
+            connection.doPost(getActivitiesPublishURL(publisher), data);
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred publishing activities", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred publishing activities", e);
+        }
     }
 
-    public Activities getActivities(Publisher publisher) throws JAXBException, IOException {
-        InputStream inputStream = connection.doGet(getActivitiesURL(publisher));
-        return Translator.parseActivities(new InputSource(inputStream));
+    public Activities getActivities(Publisher publisher) throws GnipException {
+        try {
+            InputStream inputStream = connection.doGet(getActivitiesURL(publisher));
+            return Translator.parseActivities(new InputSource(inputStream));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }        
     }
 
-    public Activities getActivities(Publisher publisher, DateTime date) throws JAXBException, IOException {
-        InputStream inputStream = connection.doGet(getActivitiesURL(publisher, date));
-        return Translator.parseActivities(new InputSource(inputStream));
+    public Activities getActivities(Publisher publisher, DateTime date) throws GnipException {
+        try {
+            InputStream inputStream = connection.doGet(getActivitiesURL(publisher, date));
+            return Translator.parseActivities(new InputSource(inputStream));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
     }
 
-    public Activities getActivities(Collection collection) throws JAXBException, IOException {
-        InputStream inputStream = connection.doGet(getActivitiesURL(collection));
-        return Translator.parseActivities(new InputSource(inputStream));
+    public Activities getActivities(Publisher publisher, Filter filter) throws GnipException {
+        try {
+            InputStream inputStream = connection.doGet(getActivitiesURL(publisher, filter));
+            return Translator.parseActivities(new InputSource(inputStream));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting activities for Filter", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting activities for Filter", e);
+        }        
     }
 
-    public Activities getActivities(Collection collection, DateTime date) throws JAXBException, IOException {
-        InputStream inputStream = connection.doGet(getActivitiesURL(collection, date));
-        return Translator.parseActivities(new InputSource(inputStream));
+    public Activities getActivities(Publisher publisher, Filter filter, DateTime date) throws GnipException {
+        try {
+            InputStream inputStream = connection.doGet(getActivitiesURL(publisher, filter, date));
+            return Translator.parseActivities(new InputSource(inputStream));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting activities for Filter", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting activities for Filter", e);
+        }
     }
 
     private byte[] getData(Object resource) throws JAXBException, IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         OutputStream stream;
-        if (config.useGzip()) {
+        if (config.isUseGzip()) {
             stream = new GZIPOutputStream(byteArrayOutputStream);
         } else {
             stream = byteArrayOutputStream;
         }
         Translator.marshall(resource, stream);
         stream.flush();
-        if (config.useGzip()) {
+        if (config.isUseGzip()) {
             //noinspection ConstantConditions
             ((GZIPOutputStream) stream).finish();
         }
@@ -110,36 +223,32 @@ public class GnipConnection {
         return config.getGnipServer() + "/publishers";
     }
 
-    private String getCollectionsURL() {
-        return config.getGnipServer() + "/collections";
-    }
-
-    private String getUidsURL(Collection collection, Uid uid) throws UnsupportedEncodingException {
-        return getCollectionsURL() + "/" + collection.getName() + "/uids?uid=" + encode(uid.getName()) + "&publisher.name=" + encode(uid.getPublisherName());
-    }
-
-    private String encode(String string) throws UnsupportedEncodingException {
-        return URLEncoder.encode(string, "UTF-8");
-    }
-
-    private String getUidsURL(Collection collection) {
-        return getCollectionsURL() + "/" + collection.getName() + "/uids";
-    }
-
     private String getPublisherURL(String publisherName) {
         return getPublishersURL() + "/" + publisherName + ".xml";
-    }
-
-    private String getCollectionURL(String collectionName) {
-        return getCollectionsURL() + "/" + collectionName + ".xml";
     }
 
     private String getURL(Publisher publisher) {
         return getPublishersURL() + "/" + publisher.getName();
     }
 
-    private String getURL(Collection collection) {
-        return getCollectionsURL() + "/" + collection.getName();
+    private String getFilterCreateURL(String publisherName) {
+        return getPublishersURL() + "/" + publisherName + "/filters";
+    }
+
+    private String getFilterURL(Publisher publisher, Filter filter) {
+        return getFilterURL(publisher.getName(), filter.getName());
+    }
+
+    private String getFilterURL(String publisherName, String filterName) {
+        return getPublishersURL() + "/" + publisherName + "/filters/" + filterName + ".xml";
+    }
+
+    private String getRulesURL(String publisherName, String filterName) {
+        return getPublishersURL() + "/" + publisherName + "/filters/" + filterName + "/rules";
+    }
+
+    private String getRulesDeleteURL(Publisher publisher, Filter filter, Rule rule) throws UnsupportedEncodingException {
+        return getRulesURL(publisher.getName(), filter.getName()) + "?type=" + encode(rule.getType().toString()) + "&value=" + encode(rule.getValue());
     }
 
     private String getActivitiesPublishURL(Publisher publisher) {
@@ -154,12 +263,20 @@ public class GnipConnection {
         return getURL(publisher) + "/activity/" + getDateString(date) + ".xml";
     }
 
-    private String getActivitiesURL(Collection collection) {
-        return getURL(collection) + "/activity/current.xml";
+    private String getActivitiesURL(Publisher publisher, Filter filter) {
+        if(filter.isFullData())
+            return getFilterCreateURL(publisher.getName()) + "/" + filter.getName() + "/activity/current.xml";
+        else return getFilterCreateURL(publisher.getName()) + "/" + filter.getName() + "/notification/current.xml";
     }
 
-    private String getActivitiesURL(Collection collection, DateTime date) {
-        return getURL(collection) + "/activity" + getDateString(date) + ".xml";
+    private String getActivitiesURL(Publisher publisher, Filter filter, DateTime date) {
+        if(filter.isFullData())
+            return getFilterCreateURL(publisher.getName()) + "/" + filter.getName() + "/activity/" + getDateString(date) + ".xml";
+        else return getFilterCreateURL(publisher.getName()) + "/" + filter.getName() + "/notification/" + getDateString(date) + ".xml";
+    }
+
+    private String encode(String string) throws UnsupportedEncodingException {
+        return URLEncoder.encode(string, "UTF-8");
     }
 
     private String getDateString(DateTime date) {
@@ -171,6 +288,4 @@ public class GnipConnection {
         long floor = new Double(Math.floor(date.getMillis() / FIVE_MINUTES)).longValue();
         return new DateTime(floor * FIVE_MINUTES, DateTimeZone.UTC);
     }
-
-    private static final long FIVE_MINUTES = 300000;
 }
