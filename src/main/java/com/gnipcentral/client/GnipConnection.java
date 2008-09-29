@@ -13,7 +13,7 @@ import javax.xml.bind.JAXBException;
 
 public class GnipConnection {
 
-    private static final long FIVE_MINUTES = 60000;
+    private static final long BUCKET_SIZE = 60000;
     
     private final HTTPConnection connection;
     private final Config config;
@@ -152,7 +152,7 @@ public class GnipConnection {
 
     public Activities getActivities(Publisher publisher) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivitiesURL(publisher));
+            InputStream inputStream = connection.doGet(getActivityURL(publisher, false));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -160,12 +160,38 @@ public class GnipConnection {
         }
         catch(JAXBException e) {
             throw new GnipException("Exception occurred getting activities", e);
-        }        
+        }
     }
 
     public Activities getActivities(Publisher publisher, DateTime date) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivitiesURL(publisher, date));
+            InputStream inputStream = connection.doGet(getActivityURL(publisher, false, date));
+            return Translator.parseActivities(new InputSource(inputStream));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
+    }
+
+    public Activities getNotifications(Publisher publisher) throws GnipException {
+        try {
+            InputStream inputStream = connection.doGet(getActivityURL(publisher, true));
+            return Translator.parseActivities(new InputSource(inputStream));
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred getting activities", e);
+        }
+    }
+
+    public Activities getNotifications(Publisher publisher, DateTime date) throws GnipException {
+        try {
+            InputStream inputStream = connection.doGet(getActivityURL(publisher, true, date));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -186,7 +212,7 @@ public class GnipConnection {
         }
         catch(JAXBException e) {
             throw new GnipException("Exception occurred getting activities for Filter", e);
-        }        
+        }
     }
 
     public Activities getActivities(Publisher publisher, Filter filter, DateTime date) throws GnipException {
@@ -227,7 +253,7 @@ public class GnipConnection {
         return getPublishersURL() + "/" + publisherName + ".xml";
     }
 
-    private String getURL(Publisher publisher) {
+    private String getPublisherURL(Publisher publisher) {
         return getPublishersURL() + "/" + publisher.getName();
     }
 
@@ -252,15 +278,19 @@ public class GnipConnection {
     }
 
     private String getActivitiesPublishURL(Publisher publisher) {
-        return getURL(publisher) + "/activity";
+        return getPublisherURL(publisher) + "/activity";
     }
 
-    private String getActivitiesURL(Publisher publisher) {
-        return getURL(publisher) + "/activity/current.xml";
+    private String getActivityURL(Publisher publisher, boolean isNotification) {
+        return isNotification ?
+            getPublisherURL(publisher) + "/notification/current.xml" :
+            getPublisherURL(publisher) + "/activity/current.xml";
     }
 
-    private String getActivitiesURL(Publisher publisher, DateTime date) {
-        return getURL(publisher) + "/activity/" + getDateString(date) + ".xml";
+    private String getActivityURL(Publisher publisher, boolean isNotification, DateTime date) {
+        return isNotification ?
+            getPublisherURL(publisher) + "/notification/" + getDateString(date) + ".xml" :
+            getPublisherURL(publisher) + "/activity/" + getDateString(date) + ".xml";                
     }
 
     private String getActivitiesURL(Publisher publisher, Filter filter) {
@@ -285,7 +315,7 @@ public class GnipConnection {
     }
 
     private static DateTime fiveMinuteFloor(DateTime date) {
-        long floor = new Double(Math.floor(date.getMillis() / FIVE_MINUTES)).longValue();
-        return new DateTime(floor * FIVE_MINUTES, DateTimeZone.UTC);
+        long floor = new Double(Math.floor(date.getMillis() / BUCKET_SIZE)).longValue();
+        return new DateTime(floor * BUCKET_SIZE, DateTimeZone.UTC);
     }
 }

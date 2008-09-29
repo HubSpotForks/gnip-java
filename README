@@ -16,6 +16,11 @@ connect to Gnip.  This file should be of the format:
 gnip.username=darthvader
 gnip.password=goempire
 gnip.host=https://s.gnipcentral.com
+gnip.publisher=apublisheryouown
+
+Note, the JUnit tests publish activities to a Publisher.  You can only own publish
+activities to a Publisher when you own it, so create a Publisher and provide its
+name above in the "gnip.publisher" property.
 
 To test the library, run:
 
