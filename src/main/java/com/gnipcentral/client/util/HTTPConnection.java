@@ -12,6 +12,7 @@ import java.util.zip.GZIPInputStream;
 
 public class HTTPConnection {
 
+    private final Logger LOG = Logger.getInstance();
     private final Config config;
 
     public HTTPConnection(Config config) {
@@ -20,29 +21,29 @@ public class HTTPConnection {
 
     public InputStream doGet(String urlString) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.GET);
-        System.out.printf("HTTP GET to %s\n", urlString);
+        LOG.log("HTTP GET to %s\n", urlString);
         return getData(urlConnection);
     }
 
     public InputStream doPost(String urlString, byte[] data) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.POST);
-        System.out.printf("HTTP POST to %s\n", urlString);
+        LOG.log("HTTP POST to %s\n", urlString);
         if(!config.isUseGzip())
-            System.out.printf("with data \n%s\n", new String(data));
+            LOG.log("with data \n%s\n", new String(data));
         return transferData(data, urlConnection);
     }
 
     public InputStream doPut(String urlString, byte[] data) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.PUT);
-        System.out.printf("HTTP PUT to %s\n", urlString);
+        LOG.log("HTTP PUT to %s\n", urlString);
         if(!config.isUseGzip())
-            System.out.printf("with data\n%s\n", new String(data));
+            LOG.log("with data\n%s\n", new String(data));
         return transferData(data, urlConnection);
     }
 
     public InputStream doDelete(String urlString) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.DELETE);
-        System.out.printf("HTTP DELETE to %s\n", urlString);
+        LOG.log("HTTP DELETE to %s\n", urlString);
         return getData(urlConnection);
     }
 

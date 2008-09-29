@@ -1,6 +1,7 @@
 package com.gnipcentral.client;
 
 import com.gnipcentral.client.resource.*;
+import com.gnipcentral.client.util.Logger;
 import org.joda.time.DateTime;
 import org.apache.commons.codec.binary.Base64;
 
@@ -12,13 +13,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
-// todo: add logger and remove System.out
 public class GnipConnectionTest extends BaseTestCase {
 
     private final static String GNIP_USER;
     private final static String GNIP_PASSWD;
     private final static String GNIP_HOST;
     private final static String GNIP_PUBLISHER;
+    private final static Logger LOG;
 
     static {
         Properties p = new Properties();
@@ -35,6 +36,8 @@ public class GnipConnectionTest extends BaseTestCase {
         GNIP_PASSWD = p.getProperty("gnip.password");
         GNIP_HOST = p.getProperty("gnip.host");
         GNIP_PUBLISHER = p.getProperty("gnip.publisher");
+
+        LOG = Logger.getInstance(new Logger.ConsoleLogger());
     }
 
     private GnipConnection gnipConnection;
@@ -50,8 +53,8 @@ public class GnipConnectionTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        System.out.println("Test setUp() start");
-        System.out.printf("Attempting to connect to Gnip at %s using username %s\n", GNIP_HOST, GNIP_USER);
+        LOG.log("Test setUp() start");
+        LOG.log("Attempting to connect to Gnip at %s using username %s\n", GNIP_HOST, GNIP_USER);
         Config config = new Config(GNIP_USER, GNIP_PASSWD, new URL(GNIP_HOST));
         gnipConnection = new GnipConnection(config);
 
@@ -99,13 +102,13 @@ public class GnipConnectionTest extends BaseTestCase {
         Thread.sleep(5000); // sleep to ensure that the filter is createdn
                             // before starting to run the tests
 
-        System.out.println("Test setUp() end");
+        LOG.log("Test setUp() end");
     }
 
     protected void tearDown() throws Exception {
-        System.out.println("Test tearDown() start");
+        LOG.log("Test tearDown() start");
         gnipConnection.delete(localPublisher, existingFilter);
-        System.out.println("Test tearDown() end");
+        LOG.log("Test tearDown() end");
         super.tearDown();
     }
 
