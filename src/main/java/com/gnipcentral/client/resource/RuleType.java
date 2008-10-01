@@ -33,6 +33,10 @@ public enum RuleType {
         return value;
     }
 
+    public String toString() {
+        return value();
+    }
+
     public static RuleType fromValue(String v) {
         for (RuleType c : RuleType.values()) {
             if (c.value.equalsIgnoreCase(v)) {

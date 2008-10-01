@@ -19,6 +19,7 @@ public class GnipConnectionTest extends BaseTestCase {
     private final static String GNIP_PASSWD;
     private final static String GNIP_HOST;
     private final static String GNIP_PUBLISHER;
+    private final static Integer GNIP_IDLESECS;
     private final static Logger LOG;
 
     static {
@@ -36,6 +37,7 @@ public class GnipConnectionTest extends BaseTestCase {
         GNIP_PASSWD = p.getProperty("gnip.password");
         GNIP_HOST = p.getProperty("gnip.host");
         GNIP_PUBLISHER = p.getProperty("gnip.publisher");
+        GNIP_IDLESECS = new Integer(p.getProperty("gnip.idlesecs"))*1000;
 
         LOG = Logger.getInstance(new Logger.ConsoleLogger());
     }
@@ -53,7 +55,7 @@ public class GnipConnectionTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        LOG.log("Test setUp() start");
+        LOG.log("========== Test setUp() start\n");
         LOG.log("Attempting to connect to Gnip at %s using username %s\n", GNIP_HOST, GNIP_USER);
         Config config = new Config(GNIP_USER, GNIP_PASSWD, new URL(GNIP_HOST));
         gnipConnection = new GnipConnection(config);
@@ -99,16 +101,19 @@ public class GnipConnectionTest extends BaseTestCase {
         existingFilter.addRule(new Rule(RuleType.ACTOR, "jane"));
         gnipConnection.create(localPublisher, existingFilter);
 
-        Thread.sleep(5000); // sleep to ensure that the filter is createdn
-                            // before starting to run the tests
+        Thread.sleep(GNIP_IDLESECS); // sleep to ensure that the filter is createdn
+                                     // before starting to run the tests
 
-        LOG.log("Test setUp() end");
+        LOG.log("Test setUp() end\n");
     }
 
     protected void tearDown() throws Exception {
-        LOG.log("Test tearDown() start");
+        LOG.log("Test tearDown() start\n");
         gnipConnection.delete(localPublisher, existingFilter);
-        LOG.log("Test tearDown() end");
+        LOG.log("Test tearDown() end\n");
+
+        Thread.sleep(GNIP_IDLESECS); // sleep to ensure that the filter is createdn
+                                     // before starting to run the tests
         super.tearDown();
     }
 
@@ -183,7 +188,9 @@ public class GnipConnectionTest extends BaseTestCase {
         assertEquals(activity1.getAction(), activitiesList.get(idx-2).getAction());
         assertEquals(activity2.getAction(), activitiesList.get(idx-1).getAction());
     }
-
+/*
+    // this test can only be run if your user has permission
+    // to access full data from Gnip
     public void testGetActivityWithPayloadForPublisherFromGnip() throws Exception {
         Activities activities = new Activities();
 
@@ -204,7 +211,7 @@ public class GnipConnectionTest extends BaseTestCase {
         assertEquals(encodedRaw, activitiesList.get(idx).getPayload().getRaw());
         assertEquals(raw, activitiesList.get(idx).getPayload().getDecodedRaw());
     }
-
+*/
     public void testGetFilter() throws Exception {
         Filter existing = gnipConnection.getFilter(localPublisher.getName(), existingFilter.getName());
         assertNotNull(existing);
@@ -251,26 +258,27 @@ public class GnipConnectionTest extends BaseTestCase {
         Activities activities = gnipConnection.getActivities(localPublisher, notificationFilterToCreate, new DateTime());
         assertNotNull(activities);
         List<Activity> activityList = activities.getActivities();
-        assertEquals(activity3.getAction(), activityList.get(0).getAction());
+        assertTrue(activityList.size() > 0);
+        int idx = activityList.size();
+        assertEquals(activity3.getAction(), activityList.get(idx-1).getAction());
 
         gnipConnection.delete(localPublisher, notificationFilterToCreate);
     }
 
-    // todo
     public void testGetActivityForFilterFromGnip() throws Exception {
         gnipConnection.publish(localPublisher, activities);
         Activities activities = gnipConnection.getActivities(localPublisher, existingFilter);
         assertNotNull(activities);
-        List<Activity> activitiesList = activities.getActivities();
-        assertEquals(activity1.getAction(), activitiesList.get(0).getAction());
+        List<Activity> activityList = activities.getActivities();
+        assertEquals(activity1.getAction(), activityList.get(0).getAction());
     }
 
     public void testGetActivityForFilterFromGnipWithTime() throws Exception {
         gnipConnection.publish(localPublisher, activities);
         Activities activities = gnipConnection.getActivities(localPublisher, existingFilter, new DateTime());
         assertNotNull(activities);
-        List<Activity> activitiesList = activities.getActivities();
-        assertEquals(activity1.getAction(), activitiesList.get(0).getAction());
+        List<Activity> activityList = activities.getActivities();
+        assertEquals(activity1.getAction(), activityList.get(0).getAction());
     }
     
     public void testUpdateFilter() throws Exception {
