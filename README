@@ -17,6 +17,8 @@ gnip.username=darthvader
 gnip.password=goempire
 gnip.host=https://s.gnipcentral.com
 gnip.publisher=apublisheryouown
+# the number of seconds to wait between each test's setup / teardown
+gnip.idlesecs=2 
 
 Note, the JUnit tests publish activities to a Publisher.  You can only own publish
 activities to a Publisher when you own it, so create a Publisher and provide its
