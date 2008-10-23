@@ -9,10 +9,33 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
+import java.util.Properties;
 
 public class HTTPConnection {
 
-    private final Logger LOG = Logger.getInstance();
+    private static final String USER_AGENT_STRING;
+
+    static {
+        String properties = "META-INF/maven/com.gnipcentral/gnip-client/pom.properties";
+        InputStream is = null;
+        String v = null;
+        try {
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(properties);
+            Properties p = new Properties();
+            p.load(is);
+            v = p.getProperty("version");
+        }
+        catch(Exception e) {
+            System.err.println("Unable to load version number for the Gnip client library");
+        }
+        finally {
+            try{if(is != null) is.close();}catch(IOException ignore) {} 
+        }
+
+        USER_AGENT_STRING = "Gnip-Client-Java/" + (v != null ? v : "build");
+    }
+
+    private final Logger LOG = LoggerFactory.getInstance();
     private final Config config;
 
     public HTTPConnection(Config config) {
@@ -29,7 +52,7 @@ public class HTTPConnection {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.POST);
         LOG.log("HTTP POST to %s\n", urlString);
         if(!config.isUseGzip())
-            LOG.log("with data \n%s\n", new String(data));
+            LOG.log("with data\n  %s\n", new String(data));
         return transferData(data, urlConnection);
     }
 
@@ -37,7 +60,7 @@ public class HTTPConnection {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.PUT);
         LOG.log("HTTP PUT to %s\n", urlString);
         if(!config.isUseGzip())
-            LOG.log("with data\n%s\n", new String(data));
+            LOG.log("with data\n  %s\n", new String(data));
         return transferData(data, urlConnection);
     }
 
@@ -103,6 +126,7 @@ public class HTTPConnection {
         urlConnection.setRequestMethod(method.name());
         urlConnection.addRequestProperty("Content-Type", "application/xml");
         urlConnection.addRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64(getGnipCredentials()), Charset.forName("UTF-8")));
+        urlConnection.addRequestProperty("User-Agent", USER_AGENT_STRING);
         urlConnection.setConnectTimeout(2000);
         urlConnection.setReadTimeout(5000);
         if (config.isUseGzip()) {

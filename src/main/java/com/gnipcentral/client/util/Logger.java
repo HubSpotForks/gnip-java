@@ -3,29 +3,16 @@ package com.gnipcentral.client.util;
 /**
  *
  */
-public class Logger {
-
-    private static Logger LOG = null;
-
-    public static Logger getInstance() {
-        if(LOG == null)
-            LOG = new Logger(new NoopLogger());
-        return LOG;
-    }
-
-    public static Logger getInstance(Logger logger) {
-        if(LOG == null)
-            LOG = new Logger(logger);
-        return logger;
-    }
+public abstract class Logger {
 
     private Logger delegate;
 
-    public Logger() {
+    Logger() {
     }
 
-    public Logger(Logger logger) {
+    Logger(Logger logger) {
         delegate = logger;
+        assert delegate != null;
     }
 
     public boolean isLogEnabled() {
@@ -33,31 +20,39 @@ public class Logger {
     }
 
     public void log(Object object, Object ... args) {
-        if(isLogEnabled())
+        if(isLogEnabled()) {
             delegate.log(object, args);
+        }
     }
 
-    public static class NoopLogger extends Logger {
+    static final class NoopLogger extends Logger {
 
         @Override
-        public boolean isLogEnabled() {return false;}
+        public final boolean isLogEnabled() {
+            return false;
+        }
 
         @Override
-        public void log(Object object, Object ... args) {}
+        public final void log(Object object, Object ... args) {
+        }
     }
 
-    public static class ConsoleLogger extends Logger {
+    static final class ConsoleLogger extends Logger {
 
         @Override
-        public boolean isLogEnabled() {return true;}
+        public final boolean isLogEnabled() {
+            return true;
+        }
 
         @Override
-        public void log(Object object, Object ... args) {
+        public final void log(Object object, Object ... args) {
             out(object, args);
         }
 
         private void out(Object object, Object ... args) {
-            if(object == null) return;
+            if(object == null) {
+                return;
+            }
 
             System.out.printf(object.toString(), args);
         }
