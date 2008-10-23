@@ -4,6 +4,8 @@ import java.net.URL;
 
 public class Config {
 
+    private static final String DEFAULT_URL = "https://prod.gnipcentral.com";
+
     private boolean useGzip = false;
     private String username;
     private String password;
@@ -12,7 +14,7 @@ public class Config {
     public Config(String username, String password) {
         this.username = username;
         this.password = password;
-        gnipServer = "https://s.gnipcentral.com";
+        gnipServer = DEFAULT_URL;
     }
 
     public Config(String username, String password, URL gnipServer) {

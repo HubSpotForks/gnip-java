@@ -13,7 +13,7 @@ import javax.xml.bind.JAXBException;
 
 public class GnipConnection {
 
-    private static final long BUCKET_SIZE = 60000;
+    private static final long BUCKET_SIZE = 60 * 1000;
     
     private final HTTPConnection connection;
     private final Config config;
@@ -65,7 +65,7 @@ public class GnipConnection {
 
     public Publisher getPublisher(String publisherName) throws GnipException {
         try {
-            InputStream response = connection.doGet(getPublisherURL(publisherName));
+            InputStream response = connection.doGet(getPublisherXmlURL(publisherName));
             return Translator.parsePublisher(new InputSource(response));
         }
         catch(IOException e) {
@@ -249,7 +249,7 @@ public class GnipConnection {
         return config.getGnipServer() + "/publishers";
     }
 
-    private String getPublisherURL(String publisherName) {
+    private String getPublisherXmlURL(String publisherName) {
         return getPublishersURL() + "/" + publisherName + ".xml";
     }
 

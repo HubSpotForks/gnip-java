@@ -2,44 +2,23 @@ package com.gnipcentral.client;
 
 import com.gnipcentral.client.resource.*;
 import com.gnipcentral.client.util.Logger;
+import com.gnipcentral.client.util.LoggerFactory;
 import org.joda.time.DateTime;
 import org.apache.commons.codec.binary.Base64;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.List;
-import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 public class GnipConnectionTest extends BaseTestCase {
 
-    private final static String GNIP_USER;
-    private final static String GNIP_PASSWD;
-    private final static String GNIP_HOST;
-    private final static String GNIP_PUBLISHER;
-    private final static Integer GNIP_IDLESECS;
+    private final static TestConfig CONFIG;
     private final static Logger LOG;
 
     static {
-        Properties p = new Properties();
-        try {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.properties");
-            assertNotNull("Unable to load properties file configuring username/password", is);
-            p.load(is);
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Unable to load properties file for test.", e);
-        }
-
-        GNIP_USER = p.getProperty("gnip.username");
-        GNIP_PASSWD = p.getProperty("gnip.password");
-        GNIP_HOST = p.getProperty("gnip.host");
-        GNIP_PUBLISHER = p.getProperty("gnip.publisher");
-        GNIP_IDLESECS = new Integer(p.getProperty("gnip.idlesecs"))*1000;
-
-        LOG = Logger.getInstance(new Logger.ConsoleLogger());
+        CONFIG = TestConfig.getInstance(); 
+        LOG = LoggerFactory.getInstance();
     }
 
     private GnipConnection gnipConnection;
@@ -56,11 +35,11 @@ public class GnipConnectionTest extends BaseTestCase {
         super.setUp();
         
         LOG.log("========== Test setUp() start\n");
-        LOG.log("Attempting to connect to Gnip at %s using username %s\n", GNIP_HOST, GNIP_USER);
-        Config config = new Config(GNIP_USER, GNIP_PASSWD, new URL(GNIP_HOST));
+        LOG.log("Attempting to connect to Gnip at %s using username %s\n", CONFIG.getHost(), CONFIG.getUsername());
+        Config config = new Config(CONFIG.getUsername(), CONFIG.getPassword(), new URL(CONFIG.getHost()));
         gnipConnection = new GnipConnection(config);
 
-        String localPublisherId = GNIP_PUBLISHER;
+        String localPublisherId = CONFIG.getPublisher();
         localPublisher = gnipConnection.getPublisher(localPublisherId);
         if(localPublisher == null) {
             throw new AssertionError("No Publisher found with name " + localPublisherId + ".  Be sure " +
@@ -101,8 +80,8 @@ public class GnipConnectionTest extends BaseTestCase {
         existingFilter.addRule(new Rule(RuleType.ACTOR, "jane"));
         gnipConnection.create(localPublisher, existingFilter);
 
-        Thread.sleep(GNIP_IDLESECS); // sleep to ensure that the filter is createdn
-                                     // before starting to run the tests
+        Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is createdn
+                                               // before starting to run the tests
 
         LOG.log("Test setUp() end\n");
     }
@@ -112,8 +91,8 @@ public class GnipConnectionTest extends BaseTestCase {
         gnipConnection.delete(localPublisher, existingFilter);
         LOG.log("Test tearDown() end\n");
 
-        Thread.sleep(GNIP_IDLESECS); // sleep to ensure that the filter is createdn
-                                     // before starting to run the tests
+        Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is createdn
+                                               // before starting to run the tests
         super.tearDown();
     }
 
@@ -127,6 +106,12 @@ public class GnipConnectionTest extends BaseTestCase {
         Publisher publisher = gnipConnection.getPublisher(localPublisher.getName());
         assertNotNull(publisher);
         assertEquals(localPublisher.getName(), publisher.getName());
+    }
+
+    public void testGetPublisherIncludesCapabilities() throws Exception {
+        Publisher publisher = gnipConnection.getPublisher(localPublisher.getName());
+        assertNotNull(publisher);
+        assertTrue(localPublisher.hasRuleType(RuleType.ACTOR));
     }
 
     public void testGetPublishers() throws Exception {
@@ -188,7 +173,8 @@ public class GnipConnectionTest extends BaseTestCase {
         assertEquals(activity1.getAction(), activitiesList.get(idx-2).getAction());
         assertEquals(activity2.getAction(), activitiesList.get(idx-1).getAction());
     }
-/*
+
+    /*
     // this test can only be run if your user has permission
     // to access full data from Gnip
     public void testGetActivityWithPayloadForPublisherFromGnip() throws Exception {
@@ -211,7 +197,8 @@ public class GnipConnectionTest extends BaseTestCase {
         assertEquals(encodedRaw, activitiesList.get(idx).getPayload().getRaw());
         assertEquals(raw, activitiesList.get(idx).getPayload().getDecodedRaw());
     }
-*/
+    */
+
     public void testGetFilter() throws Exception {
         Filter existing = gnipConnection.getFilter(localPublisher.getName(), existingFilter.getName());
         assertNotNull(existing);

@@ -7,6 +7,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="activity" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element ref="pollResults" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>
             <xs:attribute name="publisher" type="uriSafeType" use="optional"/>
         </xs:complexType>
@@ -50,6 +51,11 @@
     this element -->
     <xs:element name="error" type="xs:string"/>
 
+    <!-- Root element of Result responses from Gnip.  A human readable
+    description of the result will be in the text node contained by
+    this element -->
+    <xs:element name="result" type="xs:string"/>
+
     <!-- Root element of activityStream representations -->
     <xs:element name="activityStream">
         <xs:complexType>
@@ -69,6 +75,24 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+
+  <xs:element name="subscription">
+      <xs:complexType>
+          <xs:sequence>
+              <xs:choice minOccurs="0" maxOccurs="1">
+                  <xs:element name="postUrl" type="xs:anyURI"/>
+                  <xs:element name="jid" type="xs:string"/>
+              </xs:choice>
+          </xs:sequence>
+          <xs:attribute name="type" use="required">
+              <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                      <xs:pattern value="notification|activity"/>
+                  </xs:restriction>
+              </xs:simpleType>
+          </xs:attribute>
+      </xs:complexType>
+  </xs:element>
 
     <xs:simpleType name="optionalTimeStampType">
         <xs:union memberTypes="xs:dateTime">
@@ -103,8 +127,27 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="pollResults">
+        <xs:complexType>
+            <xs:attribute name="returnCode" type="xs:string" use="required"/>
+            <xs:attribute name="etag" type="xs:string" use="required"/>
+            <xs:attribute name="date" type="xs:string" use="required"/>
+            <xs:attribute name="username" type="xs:string" use="required"/>
+            <xs:attribute name="format" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="publisher">
         <xs:complexType>
+            <xs:sequence>
+                <xs:element name="capabilities" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="ruleType" type="ruleType" minOccurs="1" maxOccurs="unbounded"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
             <xs:attribute name="name" type="uriSafeType" use="required"/>
         </xs:complexType>
     </xs:element>

@@ -1,6 +1,8 @@
 package com.gnipcentral.client.resource;
 
 import javax.xml.bind.annotation.*;
+import java.util.Set;
+import java.util.HashSet;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "publisherType")
@@ -11,10 +13,19 @@ public class Publisher implements Resource {
     @XmlSchemaType(name = "uriTypeSafe")    
     private String name;
 
+    @XmlElementWrapper(name="capabilities")
+    @XmlElement(name = "ruleType", required = true)
+    protected Set<RuleType> ruleTypes = new HashSet<RuleType>();
+    
     @SuppressWarnings({"UnusedDeclaration"})
     private Publisher() {
         // empty constructor for jaxb
     }
+
+    public Publisher(String name, Set<RuleType> ruleTypes) {
+        this.name = name;
+        this.ruleTypes = ruleTypes;
+    }    
 
     public Publisher(String name) {
         this.name = name;
@@ -22,6 +33,18 @@ public class Publisher implements Resource {
 
     public String getName() {
         return name;
+    }
+
+    public Set<RuleType> getRuleTypes() {
+        return new HashSet<RuleType>(ruleTypes);
+    }
+
+    public void addRuleType(RuleType ruleType) {
+        ruleTypes.add(ruleType);
+    }
+
+    public boolean hasRuleType(RuleType ruleType) {
+        return ruleTypes.contains(ruleType);
     }
 
     public boolean equals(Object o) {

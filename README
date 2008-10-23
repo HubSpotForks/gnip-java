@@ -1,11 +1,19 @@
-Welcome to the Java client library for Gnip!
+Welcome to Gnip's Java convenience library!
 
-This Java API provides easy access to Gnip for Java developers.  
+=Overview=
 
-To build the library, run:
+This library produces a single JAR file called gnip-client-<version>.jar that can be used
+to conveniently access Gnip services.
 
-  mvn compile
+=Building=
 
+To build the library, run: mvn compile
+
+To clean the library, run: mvn clean
+
+To package the library into its JAR, run: mvn package
+
+=Testing=
 To test the library, create the file:
 
   src/test/resources/test.properties
@@ -15,7 +23,7 @@ connect to Gnip.  This file should be of the format:
 
 gnip.username=darthvader
 gnip.password=goempire
-gnip.host=https://s.gnipcentral.com
+gnip.host=https://prod.gnipcentral.com
 gnip.publisher=apublisheryouown
 # the number of seconds to wait between each test's setup / teardown
 gnip.idlesecs=2 
@@ -24,14 +32,4 @@ Note, the JUnit tests publish activities to a Publisher.  You can only own publi
 activities to a Publisher when you own it, so create a Publisher and provide its
 name above in the "gnip.publisher" property.
 
-To test the library, run:
-
-  mvn test
-
-To package the library, run:
-
-  mvn package
-
-To clean the library, run:
-
-  mvn clean
+To test the library, run: mvn test
