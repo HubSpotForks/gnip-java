@@ -310,11 +310,11 @@ public class GnipConnection {
     }
 
     private String getDateString(DateTime date) {
-        DateTime flooredDate = fiveMinuteFloor(date.toDateTime(DateTimeZone.UTC));
+        DateTime flooredDate = getBucketFloor(date.toDateTime(DateTimeZone.UTC));
         return flooredDate.toString("yyyyMMddHHmm");
     }
 
-    private static DateTime fiveMinuteFloor(DateTime date) {
+    private static DateTime getBucketFloor(DateTime date) {
         long floor = new Double(Math.floor(date.getMillis() / BUCKET_SIZE)).longValue();
         return new DateTime(floor * BUCKET_SIZE, DateTimeZone.UTC);
     }

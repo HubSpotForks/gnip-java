@@ -23,7 +23,6 @@ public class GnipConnectionTest extends BaseTestCase {
 
     private GnipConnection gnipConnection;
     private Filter filterToCreate;
-    private Filter existingFilter;
     private Filter notificationFilterToCreate;
     private Activities activities;
     private Publisher localPublisher;
@@ -60,25 +59,6 @@ public class GnipConnectionTest extends BaseTestCase {
         notificationFilterToCreate = new Filter("janeFilter");
         notificationFilterToCreate.setFullData(false);
         notificationFilterToCreate.addRule(new Rule(RuleType.ACTOR, "jane"));
-        
-        // ensure that a Filter with this type doesn't exist.  if
-        // it does, delete it.  This collection may exist when a previous
-        // test run fails.  
-        String existingFilterId = "existingFilter";
-        try {
-            existingFilter = gnipConnection.getFilter(localPublisher.getName(), existingFilterId);
-            if(existingFilter != null) {
-                gnipConnection.delete(localPublisher, existingFilter);
-                existingFilter = gnipConnection.getFilter(localPublisher.getName(), existingFilterId);
-            }
-        }
-        catch(GnipException ignore) {}
-        assertNull("Filter 'existingFilter' should not exist", existingFilter);
-
-        existingFilter = new Filter(existingFilterId);
-        existingFilter.addRule(new Rule(RuleType.ACTOR, "joe"));
-        existingFilter.addRule(new Rule(RuleType.ACTOR, "jane"));
-        gnipConnection.create(localPublisher, existingFilter);
 
         Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is createdn
                                                // before starting to run the tests
@@ -88,18 +68,14 @@ public class GnipConnectionTest extends BaseTestCase {
 
     protected void tearDown() throws Exception {
         LOG.log("Test tearDown() start\n");
-        gnipConnection.delete(localPublisher, existingFilter);
-        LOG.log("Test tearDown() end\n");
-
-        Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is createdn
-                                               // before starting to run the tests
+        Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is created before starting to run the tests
+        LOG.log("Test tearDown() end\n");        
         super.tearDown();
     }
 
     public void testEmpty() throws Exception {
-        // this space intentionally left blank.
-
-        // ensures that the setUp() and tearDown() method pair work when run by themselves
+        // this space intentionally left blank and ensures that the
+        // setUp() and tearDown() method pair work when run by themselves
     }
 
     public void testGetPublisher() throws Exception {
@@ -111,7 +87,7 @@ public class GnipConnectionTest extends BaseTestCase {
     public void testGetPublisherIncludesCapabilities() throws Exception {
         Publisher publisher = gnipConnection.getPublisher(localPublisher.getName());
         assertNotNull(publisher);
-        assertTrue(localPublisher.hasRuleType(RuleType.ACTOR));
+        assertTrue(localPublisher.hasSupportedRuleType(RuleType.ACTOR));
     }
 
     public void testGetPublishers() throws Exception {
@@ -154,6 +130,9 @@ public class GnipConnectionTest extends BaseTestCase {
 
     public void testGetNotificationForPublisherFromGnip() throws Exception {
         gnipConnection.publish(localPublisher, activities);
+
+        waitForServerWorkToComplete();
+
         Activities activities = gnipConnection.getNotifications(localPublisher);
         assertNotNull(activities);
         List<Activity> activitiesList = activities.getActivities();
@@ -165,8 +144,13 @@ public class GnipConnectionTest extends BaseTestCase {
 
     public void testGetNotificationForPublisherFromGnipWithTime() throws Exception {
         gnipConnection.publish(localPublisher, activities);
-        Activities activities = gnipConnection.getNotifications(localPublisher, new DateTime());
-        assertNotNull(activities);
+
+        //waitForServerWorkToComplete();
+        Thread.sleep(4000);
+
+        DateTime bucketTime = new DateTime();
+        Activities activities = gnipConnection.getNotifications(localPublisher, bucketTime);
+        assertNotNull(activities.getActivities());
         List<Activity> activitiesList = activities.getActivities();
         int idx = activitiesList.size()-1;
         assertTrue(activitiesList.size() >= 2);
@@ -188,6 +172,8 @@ public class GnipConnectionTest extends BaseTestCase {
 
         gnipConnection.publish(localPublisher, activities);
 
+        waitForServerWorkToComplete();                                            
+
         activities = gnipConnection.getActivities(localPublisher);
         assertNotNull(activities);
         List<Activity> activitiesList = activities.getActivities();
@@ -200,32 +186,69 @@ public class GnipConnectionTest extends BaseTestCase {
     */
 
     public void testGetFilter() throws Exception {
-        Filter existing = gnipConnection.getFilter(localPublisher.getName(), existingFilter.getName());
-        assertNotNull(existing);
-        assertEquals(2, existing.getRules().size());
+        boolean createdFilter = false;
+        Filter existingFilter = new Filter("existingFilter");
+        try {
+            existingFilter.addRule(new Rule(RuleType.ACTOR, "joe"));
+            existingFilter.addRule(new Rule(RuleType.ACTOR, "jane"));
+            gnipConnection.create(localPublisher, existingFilter);
+
+            waitForServerWorkToComplete();
+
+            Filter existing = gnipConnection.getFilter(localPublisher.getName(), existingFilter.getName());
+
+            waitForServerWorkToComplete();
+
+            assertNotNull(existing);
+            assertEquals(2, existing.getRules().size());
+        }
+        catch(Exception e) {
+            throw e;
+        }
+        finally {
+            if(createdFilter) {
+                gnipConnection.delete(localPublisher, existingFilter);
+            }
+        }
     }
 
     public void testCreateFilter() throws Exception {
-        gnipConnection.create(localPublisher, filterToCreate);
-        Filter filter = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
-        assertNotNull(filter);
-        assertEquals(filterToCreate.getName(), filter.getName());
+        boolean filterCreated = false;
+        try {
+            gnipConnection.create(localPublisher, filterToCreate);
+            filterCreated = true;
 
-        List<Rule> list = filter.getRules();
-        assertEquals(1, list.size());
-        Rule rule = list.get(0);
-        assertEquals(RuleType.ACTOR, rule.getType());
-        assertEquals("tom", rule.getValue());
-        gnipConnection.delete(localPublisher, filterToCreate);
+            waitForServerWorkToComplete();
+
+            Filter filter = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
+            assertNotNull(filter);
+            assertEquals(filterToCreate.getName(), filter.getName());
+            List<Rule> list = filter.getRules();
+            assertEquals(1, list.size());
+            Rule rule = list.get(0);
+            assertEquals(RuleType.ACTOR, rule.getType());
+            assertEquals("tom", rule.getValue());
+        }
+        finally {
+            if(filterCreated) {
+                gnipConnection.delete(localPublisher, filterToCreate);
+            }
+        }
     }
 
     public void testGetNotificationForFilterFromGnip() throws Exception {
         assertFalse(notificationFilterToCreate.isFullData());
         gnipConnection.create(localPublisher, notificationFilterToCreate);
+
+        waitForServerWorkToComplete();                        
+
         Filter filter = gnipConnection.getFilter(localPublisher.getName(), notificationFilterToCreate.getName());
         assertNotNull(filter);
 
         gnipConnection.publish(localPublisher, activities);
+
+        waitForServerWorkToComplete();
+        
         Activities activities = gnipConnection.getActivities(localPublisher, notificationFilterToCreate);
         assertNotNull(activities);
         List<Activity> activityList = activities.getActivities();
@@ -238,10 +261,16 @@ public class GnipConnectionTest extends BaseTestCase {
     public void testGetNotificationForFilterFromGnipWithTime() throws Exception {
         assertFalse(notificationFilterToCreate.isFullData());
         gnipConnection.create(localPublisher, notificationFilterToCreate);
+
+        waitForServerWorkToComplete();                        
+
         Filter filter = gnipConnection.getFilter(localPublisher.getName(), notificationFilterToCreate.getName());
         assertNotNull(filter);
 
         gnipConnection.publish(localPublisher, activities);
+
+        waitForServerWorkToComplete();
+        
         Activities activities = gnipConnection.getActivities(localPublisher, notificationFilterToCreate, new DateTime());
         assertNotNull(activities);
         List<Activity> activityList = activities.getActivities();
@@ -253,26 +282,76 @@ public class GnipConnectionTest extends BaseTestCase {
     }
 
     public void testGetActivityForFilterFromGnip() throws Exception {
-        gnipConnection.publish(localPublisher, activities);
-        Activities activities = gnipConnection.getActivities(localPublisher, existingFilter);
-        assertNotNull(activities);
-        List<Activity> activityList = activities.getActivities();
-        assertEquals(activity1.getAction(), activityList.get(0).getAction());
+        boolean createdFilter = false;
+        Filter existingFilter = new Filter("existingFilter");
+        try {
+            existingFilter.addRule(new Rule(RuleType.ACTOR, "joe"));
+            existingFilter.addRule(new Rule(RuleType.ACTOR, "jane"));
+            gnipConnection.create(localPublisher, existingFilter);
+            createdFilter = true;
+
+            waitForServerWorkToComplete();
+
+            gnipConnection.publish(localPublisher, activities);
+
+            waitForServerWorkToComplete();
+
+            Activities activities = gnipConnection.getActivities(localPublisher, existingFilter);
+            assertNotNull(activities);
+            List<Activity> activityList = activities.getActivities();
+            assertEquals(activity1.getAction(), activityList.get(0).getAction());
+        }
+        catch(Exception e) {
+            throw e;
+        }
+        finally {
+            if(createdFilter) {
+                gnipConnection.delete(localPublisher, existingFilter);
+            }
+        }
     }
 
     public void testGetActivityForFilterFromGnipWithTime() throws Exception {
-        gnipConnection.publish(localPublisher, activities);
-        Activities activities = gnipConnection.getActivities(localPublisher, existingFilter, new DateTime());
-        assertNotNull(activities);
-        List<Activity> activityList = activities.getActivities();
-        assertEquals(activity1.getAction(), activityList.get(0).getAction());
+        boolean createdFilter = false;
+        Filter existingFilter = new Filter("existingFilter");
+        try {
+            existingFilter.addRule(new Rule(RuleType.ACTOR, "joe"));
+            existingFilter.addRule(new Rule(RuleType.ACTOR, "jane"));
+            gnipConnection.create(localPublisher, existingFilter);
+            createdFilter = true;
+
+            waitForServerWorkToComplete();            
+
+            gnipConnection.publish(localPublisher, activities);
+
+            waitForServerWorkToComplete();                                    
+
+            Activities activities = gnipConnection.getActivities(localPublisher, existingFilter, new DateTime());
+            assertNotNull(activities);
+            List<Activity> activityList = activities.getActivities();
+            assertEquals(activity1.getAction(), activityList.get(0).getAction());
+        }
+        catch(Exception e) {
+            throw e;
+        }
+        finally {
+            if(createdFilter) {
+                gnipConnection.delete(localPublisher, existingFilter);
+            }
+        }        
     }
     
     public void testUpdateFilter() throws Exception {
         gnipConnection.create(localPublisher, filterToCreate);
+
+        waitForServerWorkToComplete();
+
         Filter filter = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
         filter.addRule(new Rule(RuleType.ACTOR, "jojo"));
         gnipConnection.update(localPublisher, filter);
+
+        waitForServerWorkToComplete();
+        
         Filter updated = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
         List<Rule> rules = updated.getRules();
         assertEquals(2, rules.size());
@@ -287,9 +366,15 @@ public class GnipConnectionTest extends BaseTestCase {
 
     public void testDeleteFilter() throws Exception {
         gnipConnection.create(localPublisher, filterToCreate);
+
+        waitForServerWorkToComplete();
+
         Filter filter = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
         assertNotNull(filter);
         gnipConnection.delete(localPublisher, filter);
+
+        waitForServerWorkToComplete();
+
         try {
             gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
             fail();
@@ -310,8 +395,13 @@ public class GnipConnectionTest extends BaseTestCase {
 
     public void testAddRuleToFilter() throws Exception {
         gnipConnection.create(localPublisher, filterToCreate);
+
+        waitForServerWorkToComplete();
+
         Rule ruleToAdd = new Rule(RuleType.ACTOR, "jojo");
         gnipConnection.update(localPublisher, filterToCreate, ruleToAdd);
+
+        waitForServerWorkToComplete();
 
         Filter updated = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
         List<Rule> rules = updated.getRules();
@@ -327,8 +417,13 @@ public class GnipConnectionTest extends BaseTestCase {
 
     public void testDeleteRuleFromFilter() throws Exception {
         gnipConnection.create(localPublisher, filterToCreate);
+
+        waitForServerWorkToComplete();
+
         Rule ruleToDelete = new Rule(RuleType.ACTOR, "jojo");
         gnipConnection.update(localPublisher, filterToCreate, ruleToDelete);
+
+        waitForServerWorkToComplete();
 
         Filter updated = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
         List<Rule> rules = updated.getRules();
@@ -340,6 +435,8 @@ public class GnipConnectionTest extends BaseTestCase {
 
         gnipConnection.delete(localPublisher, filterToCreate, ruleToDelete);
 
+        waitForServerWorkToComplete();
+
         updated = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
         rules = updated.getRules();
         assertEquals(1, rules.size());
@@ -348,6 +445,10 @@ public class GnipConnectionTest extends BaseTestCase {
         assertEquals("tom", rules.get(0).getValue());
         
         gnipConnection.delete(localPublisher, filterToCreate);
+    }
+
+    private void waitForServerWorkToComplete() throws Exception {
+        Thread.sleep(CONFIG.getIdleSeconds());
     }
 
     private String encodePayload(String string) throws Exception {

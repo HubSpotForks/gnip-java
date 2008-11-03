@@ -21,18 +21,19 @@ public class HTTPConnection {
         String v = null;
         try {
             is = Thread.currentThread().getContextClassLoader().getResourceAsStream(properties);
-            Properties p = new Properties();
-            p.load(is);
-            v = p.getProperty("version");
+            if(is != null) {
+                Properties p = new Properties();
+                p.load(is);
+                v = p.getProperty("version");
+            }
         }
         catch(Exception e) {
-            System.err.println("Unable to load version number for the Gnip client library");
+            System.err.println("Unable to load version number for the Gnip client library.  Exception: " + e);
         }
         finally {
             try{if(is != null) is.close();}catch(IOException ignore) {} 
+            USER_AGENT_STRING = "Gnip-Client-Java/" + (v != null ? v : "build");
         }
-
-        USER_AGENT_STRING = "Gnip-Client-Java/" + (v != null ? v : "build");
     }
 
     private final Logger LOG = LoggerFactory.getInstance();

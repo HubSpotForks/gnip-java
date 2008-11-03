@@ -19,7 +19,6 @@
             <xs:sequence>
                 <xs:choice minOccurs="0" maxOccurs="1">
                     <xs:element name="postUrl" type="xs:anyURI"/>
-                    <xs:element name="jid" type="xs:string"/>
                 </xs:choice>
                 <xs:element ref="rule" maxOccurs="unbounded" minOccurs="1"/>
             </xs:sequence>
@@ -81,7 +80,6 @@
           <xs:sequence>
               <xs:choice minOccurs="0" maxOccurs="1">
                   <xs:element name="postUrl" type="xs:anyURI"/>
-                  <xs:element name="jid" type="xs:string"/>
               </xs:choice>
           </xs:sequence>
           <xs:attribute name="type" use="required">
@@ -139,15 +137,17 @@
 
     <xs:element name="publisher">
         <xs:complexType>
+
             <xs:sequence>
-                <xs:element name="capabilities" minOccurs="0" maxOccurs="1">
+                <xs:element name="supportedRuleTypes" minOccurs="1" maxOccurs="1">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="ruleType" type="ruleType" minOccurs="1" maxOccurs="unbounded"/>
+                            <xs:element name="type" type="ruleType" minOccurs="1" maxOccurs="unbounded"/>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
+
             <xs:attribute name="name" type="uriSafeType" use="required"/>
         </xs:complexType>
     </xs:element>

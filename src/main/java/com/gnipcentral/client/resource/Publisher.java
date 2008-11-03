@@ -13,8 +13,8 @@ public class Publisher implements Resource {
     @XmlSchemaType(name = "uriTypeSafe")    
     private String name;
 
-    @XmlElementWrapper(name="capabilities")
-    @XmlElement(name = "ruleType", required = true)
+    @XmlElementWrapper(name="supportedRuleTypes")
+    @XmlElement(name = "type", required = true)
     protected Set<RuleType> ruleTypes = new HashSet<RuleType>();
     
     @SuppressWarnings({"UnusedDeclaration"})
@@ -35,15 +35,19 @@ public class Publisher implements Resource {
         return name;
     }
 
-    public Set<RuleType> getRuleTypes() {
+    public Set<RuleType> getSupportedRuleTypes() {
         return new HashSet<RuleType>(ruleTypes);
     }
 
-    public void addRuleType(RuleType ruleType) {
+    public void addSupportedRuleType(RuleType ruleType) {
         ruleTypes.add(ruleType);
     }
 
-    public boolean hasRuleType(RuleType ruleType) {
+    public void removeSupportedRuleType(RuleType ruleType) {
+        ruleTypes.remove(ruleType);
+    }
+
+    public boolean hasSupportedRuleType(RuleType ruleType) {
         return ruleTypes.contains(ruleType);
     }
 

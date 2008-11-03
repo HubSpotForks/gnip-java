@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {"postUrl","jid","rules"})
+@XmlType(name = "", propOrder = {"postUrl","rules"})
 @XmlRootElement(name = "filter")
 public class Filter implements Resource {
 
@@ -15,9 +15,6 @@ public class Filter implements Resource {
     @XmlElement(name="postUrl")
     @XmlSchemaType(name = "anyURI")
     private String postUrl;
-
-    @XmlElement(name="jid")
-    private String jid;
 
     @XmlAttribute(required = true)
     private String name;
@@ -79,14 +76,6 @@ public class Filter implements Resource {
         this.postUrl = value;
     }
 
-    public String getJid() {
-        return jid;
-    }
-
-    public void setJid(String jid) {
-        this.jid = jid;
-    }
-
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -96,8 +85,6 @@ public class Filter implements Resource {
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (fullData != that.fullData) return false;
         if (postUrl != null ? !postUrl.equals(that.postUrl) : that.postUrl != null) return false;
-        if (jid != null ? !jid.equals(that.jid) : that.jid != null) return false;        
-
         return true;
     }
 
@@ -106,7 +93,6 @@ public class Filter implements Resource {
         result = (rules != null ? rules.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (postUrl != null ? postUrl.hashCode() : 0);
-        result = 31 * result + (jid != null ? jid.hashCode() : 0);        
         return result;
     }
 }
