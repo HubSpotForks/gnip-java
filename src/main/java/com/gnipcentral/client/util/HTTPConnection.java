@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 import java.util.Properties;
+import java.util.Date;
 
 public class HTTPConnection {
 
@@ -74,11 +75,19 @@ public class HTTPConnection {
     private InputStream transferData(byte[] data, HttpURLConnection urlConnection) throws IOException {
         urlConnection.setDoOutput(true);
         urlConnection.setFixedLengthStreamingMode(data.length);
+
+        LOG.log("Starting data transfer at %s\n", (new Date()).toString());
         urlConnection.connect();
         OutputStream out = urlConnection.getOutputStream();
         IOUtils.copy(new ByteArrayInputStream(data), out);
         out.flush();
+        LOG.log("Finished data transfer at %s\n", (new Date()).toString());
+        LOG.log("Awaiting server response...");
+
         int responseCode = urlConnection.getResponseCode();
+        LOG.log("Received response with response code %d\n", responseCode);
+
+        LOG.log("Starting data read at %s\n", (new Date()).toString());
         String responseMessage = urlConnection.getResponseMessage();
         if (responseCode != HttpURLConnection.HTTP_OK) {
             throw new IOException("Error with request code: " + responseCode + " message: " + responseMessage);
@@ -95,6 +104,8 @@ public class HTTPConnection {
         IOUtils.copy(stream, resultData);
         resultStream = new ByteArrayInputStream(resultData.toByteArray());
         urlConnection.disconnect();
+        LOG.log("Finished data read at %s\n", (new Date()).toString());
+        
         return resultStream;
     }
 
@@ -129,7 +140,7 @@ public class HTTPConnection {
         urlConnection.addRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64(getGnipCredentials()), Charset.forName("UTF-8")));
         urlConnection.addRequestProperty("User-Agent", USER_AGENT_STRING);
         urlConnection.setConnectTimeout(2000);
-        urlConnection.setReadTimeout(5000);
+        urlConnection.setReadTimeout(config.getReadTimeout());
         if (config.isUseGzip()) {
             urlConnection.addRequestProperty("Accept-Encoding", "gzip");
             urlConnection.addRequestProperty("Content-Encoding", "gzip");

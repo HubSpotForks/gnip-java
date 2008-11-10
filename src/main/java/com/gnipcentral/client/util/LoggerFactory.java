@@ -13,19 +13,29 @@ public class LoggerFactory {
         if(LOG != null)
             return LOG;
 
-        List<Class> serviceImpls = ServiceLoader.loadServices(Logger.class);
-        if(serviceImpls.size() == 0) {
-            LOG = new Logger.NoopLogger();
-        }
-        else {
-            Class c = null;
+        Class serviceImpl = null;
+        String loggerProperty = System.getProperty("gnip.logger.class");
+        if(loggerProperty != null) {
             try {
-                c = serviceImpls.get(0);
-                LOG = Logger.class.cast(c.newInstance());
+                serviceImpl = Class.forName(loggerProperty);
+            }
+            catch(ClassNotFoundException e) {
+                System.err.printf("Unable to create logger of type %s due to exception %s\n", loggerProperty, e.getMessage());                
+            }
+        } else {
+            List<Class> serviceImpls = ServiceLoader.loadServices(Logger.class);
+            serviceImpl = (serviceImpls.size() > 0 ? serviceImpls.get(0) : null);            
+        }
+        
+        if(serviceImpl == null) {
+            LOG = new Logger.NoopLogger();
+        } else {
+            try {
+                LOG = Logger.class.cast(serviceImpl.newInstance());
             } catch (IllegalAccessException e) {
-                System.err.printf("Unable to create logger of type " + c.getName(), e);
+                System.err.printf("Unable to create logger of type %s due to exception %s\n", serviceImpl.getName(), e.getMessage());
             } catch (InstantiationException e) {
-                System.err.printf("Unable to create logger of type " + c.getName(), e);                                
+                System.err.printf("Unable to create logger of type %s due to exception %s\n", serviceImpl.getName(), e.getMessage());
             }
         }
 

@@ -10,6 +10,7 @@ public class Config {
     private String username;
     private String password;
     private String gnipServer;
+    private int readTimeoutMillis = 2 * 1000;
 
     public Config(String username, String password) {
         this.username = username;
@@ -41,5 +42,13 @@ public class Config {
 
     public String getGnipServer() {
         return gnipServer;
+    }
+
+    public int getReadTimeout() {
+        return readTimeoutMillis;
+    }
+
+    public void setReadTimeout(int readTimeoutMillis) {
+        this.readTimeoutMillis = readTimeoutMillis;
     }
 }

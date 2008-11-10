@@ -2,6 +2,8 @@ package com.gnipcentral.client;
 
 import com.gnipcentral.client.resource.*;
 import com.gnipcentral.client.util.HTTPConnection;
+import com.gnipcentral.client.util.LoggerFactory;
+import com.gnipcentral.client.util.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.xml.sax.InputSource;
@@ -9,11 +11,13 @@ import org.xml.sax.InputSource;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.zip.GZIPOutputStream;
+import java.util.Date;
 import javax.xml.bind.JAXBException;
 
 public class GnipConnection {
 
     private static final long BUCKET_SIZE = 60 * 1000;
+    private static final Logger LOG = LoggerFactory.getInstance();
     
     private final HTTPConnection connection;
     private final Config config;
@@ -229,6 +233,7 @@ public class GnipConnection {
     }
 
     private byte[] getData(Object resource) throws JAXBException, IOException {
+        LOG.log("Starting data marshalling at %s\n", (new Date()).toString());
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         OutputStream stream;
         if (config.isUseGzip()) {
@@ -242,7 +247,9 @@ public class GnipConnection {
             //noinspection ConstantConditions
             ((GZIPOutputStream) stream).finish();
         }
-        return byteArrayOutputStream.toByteArray();
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        LOG.log("Finished data marshalling at %s\n", (new Date()).toString());
+        return bytes; 
     }
 
     private String getPublishersURL() {
