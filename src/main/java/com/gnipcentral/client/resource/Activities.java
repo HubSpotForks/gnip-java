@@ -10,13 +10,20 @@ import java.util.List;
 public class Activities implements Resource {
 
     @XmlElement(name = "activity", required = false, type = Activity.class)
-    private List<Activity> activities;
+    private ArrayList<Activity> activities;
+
+    @XmlAttribute(name="publisher",required=false)
+    private String publisherName;
 
     public List<Activity> getActivities() {
         if (activities == null) {
             activities = new ArrayList<Activity>();
         }
         return this.activities;
+    }
+
+    public String getPublisherName() {
+        return publisherName;
     }
 
     public boolean isEmpty() {

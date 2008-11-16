@@ -45,14 +45,16 @@
         </xs:complexType>
     </xs:element>
 
-    <!-- Root element of Error responses from Gnip.  A human readable
-    description of the problem will be in the text node contained by
-    this element -->
+    <!--
+    Root element of Error responses from Gnip.  A human readable description
+    of the problem will be in the text node contained by this element
+    -->
     <xs:element name="error" type="xs:string"/>
 
-    <!-- Root element of Result responses from Gnip.  A human readable
-    description of the result will be in the text node contained by
-    this element -->
+    <!--
+    Root element of Result responses from Gnip.  A human readable description
+    of the result will be in the text node contained by this element
+    -->
     <xs:element name="result" type="xs:string"/>
 
     <!-- Root element of activityStream representations -->

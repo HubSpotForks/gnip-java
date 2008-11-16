@@ -27,6 +27,10 @@ public class GnipConnection {
         this.config = config;
     }
 
+    public Config getConfig() {
+        return config;
+    }
+
     public void create(Publisher publisher) throws GnipException {
         try {
             byte[] data = getData(publisher);
@@ -97,7 +101,12 @@ public class GnipConnection {
     public void update(Publisher publisher, Filter filter) throws GnipException {
         try {
             byte[] data = getData(filter);
-            connection.doPut(getFilterURL(publisher, filter), data);
+            if(config.isTunnelOverPost()) {
+                connection.doPost(tunnelEditOverPost(getFilterURL(publisher, filter)), data);
+            }
+            else {
+                connection.doPut(getFilterURL(publisher, filter), data);
+            }
         }
         catch(IOException e) {
             throw new GnipException("Exception occurred updating Filter", e);
@@ -122,7 +131,12 @@ public class GnipConnection {
 
     public void delete(Publisher publisher, Filter filter) throws GnipException {
         try {
-            connection.doDelete(getFilterURL(publisher, filter));
+            if(config.isTunnelOverPost()) {
+                connection.doPost(tunnelDeleteOverPost(getFilterURL(publisher, filter)), new byte[0]);
+            }
+            else {
+                connection.doDelete(getFilterURL(publisher, filter));
+            }
         }
         catch(IOException e) {
             throw new GnipException("Exception occurred deleting Filter", e);
@@ -131,7 +145,13 @@ public class GnipConnection {
 
     public void delete(Publisher publisher, Filter filter, Rule rule) throws GnipException {
         try {
-            connection.doDelete(getRulesDeleteURL(publisher, filter, rule));
+            String url = getRulesDeleteURL(publisher, filter, rule);
+            if(config.isTunnelOverPost()) {
+                connection.doPost(url, null);
+            }
+            else {
+                connection.doDelete(url);
+            }
         }
         catch(IOException e) {
             throw new GnipException("Exception occurred deleting Rule", e);
@@ -281,7 +301,11 @@ public class GnipConnection {
     }
 
     private String getRulesDeleteURL(Publisher publisher, Filter filter, Rule rule) throws UnsupportedEncodingException {
-        return getRulesURL(publisher.getName(), filter.getName()) + "?type=" + encode(rule.getType().toString()) + "&value=" + encode(rule.getValue());
+        String url = getRulesURL(publisher.getName(), filter.getName());
+        if(config.isTunnelOverPost()) {
+            url = tunnelDeleteOverPost(url);
+        }        
+        return url + "?type=" + encode(rule.getType().toString()) + "&value=" + encode(rule.getValue());
     }
 
     private String getActivitiesPublishURL(Publisher publisher) {
@@ -310,6 +334,14 @@ public class GnipConnection {
         if(filter.isFullData())
             return getFilterCreateURL(publisher.getName()) + "/" + filter.getName() + "/activity/" + getDateString(date) + ".xml";
         else return getFilterCreateURL(publisher.getName()) + "/" + filter.getName() + "/notification/" + getDateString(date) + ".xml";
+    }
+
+    private String tunnelEditOverPost(String url) {
+        return url + ";edit";
+    }
+
+    private String tunnelDeleteOverPost(String url) {
+        return url + ";delete";
     }
 
     private String encode(String string) throws UnsupportedEncodingException {

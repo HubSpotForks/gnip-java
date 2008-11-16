@@ -1,9 +1,12 @@
 package com.gnipcentral.client.util;
 
 import com.gnipcentral.client.Config;
+import com.gnipcentral.client.resource.Error;
+import com.gnipcentral.client.resource.Translator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
+import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -54,7 +57,7 @@ public class HTTPConnection {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.POST);
         LOG.log("HTTP POST to %s\n", urlString);
         if(!config.isUseGzip())
-            LOG.log("with data\n  %s\n", new String(data));
+            LOG.log("with data\n  %s\n", data != null ? new String(data) : "");
         return transferData(data, urlConnection);
     }
 
@@ -74,24 +77,36 @@ public class HTTPConnection {
 
     private InputStream transferData(byte[] data, HttpURLConnection urlConnection) throws IOException {
         urlConnection.setDoOutput(true);
-        urlConnection.setFixedLengthStreamingMode(data.length);
+        urlConnection.setFixedLengthStreamingMode(data == null ? 0 : data.length);
 
         LOG.log("Starting data transfer at %s\n", (new Date()).toString());
         urlConnection.connect();
-        OutputStream out = urlConnection.getOutputStream();
-        IOUtils.copy(new ByteArrayInputStream(data), out);
-        out.flush();
+
+        if(data != null) {
+            OutputStream out = urlConnection.getOutputStream();
+            IOUtils.copy(new ByteArrayInputStream(data), out);
+            out.flush();
+        }
         LOG.log("Finished data transfer at %s\n", (new Date()).toString());
-        LOG.log("Awaiting server response...");
+        LOG.log("Awaiting server response...\n");
 
         int responseCode = urlConnection.getResponseCode();
         LOG.log("Received response with response code %d\n", responseCode);
 
-        LOG.log("Starting data read at %s\n", (new Date()).toString());
-        String responseMessage = urlConnection.getResponseMessage();
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new IOException("Error with request code: " + responseCode + " message: " + responseMessage);
+            String responseMessage = urlConnection.getResponseMessage();
+            String errorMessage = "";
+            try {
+                Error error = Translator.parseError(urlConnection.getErrorStream());
+                errorMessage = error.getMessage();
+            }
+            catch(JAXBException e) {
+                LOG.log("Exception occurred unmarshalling error message %s", e.getMessage());
+            }
+            throw new IOException("Error with request code: " + responseCode + " message: " + responseMessage + " " + errorMessage);
         }
+        
+        LOG.log("Starting data read at %s\n", (new Date()).toString());
         InputStream resultStream;
         InputStream stream;
         String contentEncoding = urlConnection.getHeaderField("Content-Encoding");

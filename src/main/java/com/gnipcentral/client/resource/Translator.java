@@ -18,7 +18,7 @@ public class Translator {
 
     static {
         try {
-            context = JAXBContext.newInstance(Activities.class, Activity.class, Publishers.class, Publisher.class, Filter.class, Rule.class);
+            context = JAXBContext.newInstance(Activities.class, Activity.class, Error.class, Publishers.class, Publisher.class, Filter.class, Rule.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -26,6 +26,10 @@ public class Translator {
 
     public static Activity parseActivity(String input) throws JAXBException {
         return (Activity) getUnmarshaller().unmarshal(new ByteArrayInputStream(input.getBytes(Charset.forName("UTF-8"))));
+    }
+
+    public static Error parseError(InputStream input) throws JAXBException {
+        return (Error) getUnmarshaller().unmarshal(input);
     }
 
     public static Activities parseActivities(InputSource input) throws JAXBException {
