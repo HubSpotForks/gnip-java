@@ -78,7 +78,6 @@ public class Translator {
         Marshaller marshaller = context.createMarshaller();
         marshaller.setSchema(GnipSchema.schema);
         marshaller.setProperty(Marshaller.JAXB_FRAGMENT, fragment);
-//        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT,true);
         return marshaller;
     }
 

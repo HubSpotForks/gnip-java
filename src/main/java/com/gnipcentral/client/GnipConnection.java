@@ -31,9 +31,13 @@ public class GnipConnection {
         return config;
     }
 
+    public HTTPConnection getHTTPConnection() {
+        return connection;
+    }
+
     public void create(Publisher publisher) throws GnipException {
         try {
-            byte[] data = getData(publisher);
+            byte[] data = convertToBytes(publisher);
             connection.doPost(getPublishersURL(), data);
         }
         catch(IOException e) {
@@ -46,7 +50,7 @@ public class GnipConnection {
 
     public void create(Publisher publisher, Filter filter) throws GnipException {
         try {
-            byte[] data = getData(filter);
+            byte[] data = convertToBytes(filter);
             connection.doPost(getFilterCreateURL(publisher.getName()), data);
         }
         catch(IOException e) {
@@ -100,7 +104,7 @@ public class GnipConnection {
 
     public void update(Publisher publisher, Filter filter) throws GnipException {
         try {
-            byte[] data = getData(filter);
+            byte[] data = convertToBytes(filter);
             if(config.isTunnelOverPost()) {
                 connection.doPost(tunnelEditOverPost(getFilterURL(publisher, filter)), data);
             }
@@ -118,7 +122,7 @@ public class GnipConnection {
 
     public void update(Publisher publisher, Filter filter, Rule rule) throws GnipException {
         try {
-            byte[] data = getData(rule);
+            byte[] data = convertToBytes(rule);
             connection.doPost(getRulesURL(publisher.getName(), filter.getName()), data);
         }
         catch(IOException e) {
@@ -163,7 +167,7 @@ public class GnipConnection {
             return;
 
         try {
-            byte[] data = getData(activities);
+            byte[] data = convertToBytes(activities);
             connection.doPost(getActivitiesPublishURL(publisher), data);
         }
         catch(IOException e) {
@@ -252,7 +256,7 @@ public class GnipConnection {
         }
     }
 
-    private byte[] getData(Object resource) throws JAXBException, IOException {
+    public byte[] convertToBytes(Resource resource) throws JAXBException, IOException {
         LOG.log("Starting data marshalling at %s\n", (new Date()).toString());
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         OutputStream stream;
