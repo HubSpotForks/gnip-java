@@ -16,7 +16,7 @@ import java.net.URL;
  */
 public class Config {
 
-    private static final String DEFAULT_URL = "https://prod.gnipcentral.com";
+    private static final String DEFAULT_SERVER_URL = "https://prod.gnipcentral.com";
 
     private boolean useGzip = false;
     private boolean tunnelOverPost = false;
@@ -34,7 +34,7 @@ public class Config {
     public Config(String username, String password) {
         this.username = username;
         this.password = password;
-        gnipServer = DEFAULT_URL;
+        this.gnipServer = DEFAULT_SERVER_URL;
     }
 
     /**

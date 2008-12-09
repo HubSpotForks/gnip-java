@@ -2,9 +2,6 @@ package com.gnipcentral.client.util;
 
 import java.util.List;
 
-/**
- * 
- */
 public class LoggerFactory {
 
     private static Logger LOG = null;

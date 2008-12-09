@@ -8,9 +8,6 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-/**
- * 
- */
 public class NotificationTestCase extends GnipTestCase {
 
     public void testGetNotificationForPublisherFromGnip() throws Exception {

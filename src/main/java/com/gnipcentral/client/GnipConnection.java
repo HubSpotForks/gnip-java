@@ -89,6 +89,18 @@ public class GnipConnection {
 
     }
 
+    public Filter getFilter(Publisher publisher, Filter filter) throws GnipException {
+        if(publisher == null) {
+            throw new IllegalArgumentException("Publisher cannot be null");
+        }
+
+        if(filter == null) {
+            throw new IllegalArgumentException("Filter cannot be null");
+        }
+
+        return getFilter(publisher.getName(), filter.getName());
+    }    
+
     public Filter getFilter(String publisherName, String filterName) throws GnipException {
         try {
             InputStream response = connection.doGet(getFilterURL(publisherName, filterName));

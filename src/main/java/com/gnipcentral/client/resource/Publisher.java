@@ -15,20 +15,29 @@ public class Publisher implements Resource {
 
     @XmlElementWrapper(name="supportedRuleTypes")
     @XmlElement(name = "type", required = true)
-    protected Set<RuleType> ruleTypes = new HashSet<RuleType>();
+    protected HashSet<RuleType> ruleTypes;
     
     @SuppressWarnings({"UnusedDeclaration"})
     private Publisher() {
-        // empty constructor for jaxb
+        // private ctor for jaxb
+    }
+
+    public Publisher(String name) {
+        this.name = name;
+        this.ruleTypes = new HashSet<RuleType>();
     }
 
     public Publisher(String name, Set<RuleType> ruleTypes) {
         this.name = name;
-        this.ruleTypes = ruleTypes;
-    }    
+        this.ruleTypes = new HashSet<RuleType>(ruleTypes);
+    }
 
-    public Publisher(String name) {
+    public Publisher(String name, RuleType ... ruleTypes) {        
         this.name = name;
+        this.ruleTypes = new HashSet<RuleType>(ruleTypes.length);
+        for(RuleType ruleType : ruleTypes) {
+            this.ruleTypes.add(ruleType);
+        }
     }
 
     public String getName() {
