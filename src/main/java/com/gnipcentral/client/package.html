@@ -1,0 +1,27 @@
+<html>
+<body>
+This package contains classes used by a client to establish and use a client connection to Gnip.
+
+The Gnip API supports two primary usage patterns -- publishing data into Gnip and
+subscribing to receive data from Gnip.  Depending on the situation, a Gnip user may be one, the other,
+or both.  Data is published into a Gnip {@link com.gnipcentral.client.resource.Publisher} in the form
+of a set of {@link com.gnipcentral.client.resource.Activity activities} that
+represent events that happened on the Publisher.  Events are Publisher specific and could be an article "digg"
+on Digg, a tweet from Twitter, or a train arrival from BART.  A Publisher makes data available in the form
+of a "notification" which is a notice that an event occurred that doesn't include the event's complete data.
+<br/>
+<br/>
+A user interested in getting data from Gnip can access notifications directly from a Publisher or create a
+{@link com.gnipcentral.client.resource.Filter} with a set of {@link com.gnipcentral.client.resource.Rule rules}
+that match specific activity data that a subscriber
+is interested in.  Filters can be "polled" using HTTP GET or "pushed" if a Filter has a
+{@link com.gnipcentral.client.resource.Filter#setPostUrl(String) post URL}.
+<br/>
+<br/>
+Activities that flow through Gnip are stored in buckets which capture 60 seconds of activities.  Buckets
+can be accessed at "current" or using a specific timestamp.  Note, the current bucket may be incomplete
+since by definition current is actively capturing data until its minute has elapsed.
+<br/>
+<br/>
+</body>
+</html>

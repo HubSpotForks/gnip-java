@@ -92,7 +92,7 @@ public class Payload {
             stream = new ByteArrayInputStream(bytes);
             GZIPInputStream gis = new GZIPInputStream(stream);
             BufferedReader reader = new BufferedReader(new InputStreamReader(gis));
-            String line = null;
+            String line;
             StringBuilder sb = new StringBuilder();
             while((line = reader.readLine()) != null) {
                 sb.append(line);

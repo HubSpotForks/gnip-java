@@ -70,4 +70,17 @@
             </plugin>
         </plugins>
     </build>
+    <reporting>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <doctitle>Gnip Client Library</doctitle>
+            <windowtitle>Gnip Client Library Javadoc</windowtitle>
+            <footer>(C) 2008-2009 Gnip, Inc.</footer>
+          </configuration>
+        </plugin>
+      </plugins>
+    </reporting>    
 </project>

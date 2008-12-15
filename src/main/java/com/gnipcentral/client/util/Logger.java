@@ -1,39 +1,58 @@
 package com.gnipcentral.client.util;
 
 /**
- * A basic class implementing Gnip-scoped logging functionality.  By default, the Gnip-scoped
- * Logger is a no-op and doesn't print anything.  In order to have the Gnip Java client emit
- * logging messages, extend this class and register the implementation class using the JAR
- * META-INF/services mechanism which requires that a file named:
+ * A logging abstraction that should be adapted to a specific logging implementation based on the needs of the client.
+ * The library defaults to using an empty {@link Logger} in order to avoid requiring a specific logging implementation.
+ * All {@link Logger} instances are created via {@link com.gnipcentral.client.util.LoggerFactory#getInstance()}
+ * and are configured in the environment as documented in {@link com.gnipcentral.client.util.LoggerFactory}.
+ * <br/>
+ * <br/>
+ * Messages that are logged via the logger can be in <i>printf</i> format and appear as:
  * <pre>
- * com.gnipcentral.client.util.Logger
+ *   logger.log("My favorite cookie is %s.", "chocolate chip"); 
  * </pre>
- * be available in classpath in META-INF/services containing a single, uncommented line
- * that lists the classname of the Logger implementation.  For example, the contents of this
- * file might appear as:
- * <pre>
- * org.example.MyCoolLogger
- * </pre> 
  */
 public abstract class Logger {
 
     private Logger delegate;
 
+    /**
+     * Default constructor.
+     */
     Logger() {
     }
 
+    /**
+     * Package protected constructor that is
+     * @param logger the logger delegate
+     */
     Logger(Logger logger) {
+        if(logger == null) {
+            throw new IllegalArgumentException("A Logger cannot be configured with a null delegate");
+        }
+
         delegate = logger;
-        assert delegate != null;
     }
 
+    /**
+     * Check to see if logging is enabled.
+     * 
+     * @return <code>true</code> if logging is enabled; <code>false</code> otherwise.
+     */
     public boolean isLogEnabled() {
         return delegate.isLogEnabled();
     }
 
-    public void log(Object object, Object ... args) {
+    /**
+     * Log a message with the provided message and parameters.  Messages are expected to be formatted
+     * using Java's formatted printing features provided by {@link java.util.Formatter}.
+     *  
+     * @param message the message object
+     * @param args arguments that are used to format the message argument.
+     */
+    public void log(Object message, Object ... args) {
         if(isLogEnabled()) {
-            delegate.log(object, args);
+            delegate.log(message, args);
         }
     }
 

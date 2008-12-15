@@ -3,27 +3,28 @@ package com.gnipcentral.client;
 import java.net.URL;
 
 /**
- * A Config object provides configuration information for a
- * {@link com.gnipcentral.client.GnipConnection}.  It supports basic settings
+ * Configuration information for a {@link GnipConnection}.
+ * It supports basic settings
  * for username, password, and URL of the Gnip service to connect to as
  * well as advanced settings including an option to tunnel PUT and DELETE
  * requests over POST and configuring network timeouts.
  *
  * The default connection URL is:
  * <pre>
- *   https://prod.gnipcentral.com
+ *   {@link #DEFAULT_SERVER_URL}
  * </pre>
  */
 public class Config {
 
-    private static final String DEFAULT_SERVER_URL = "https://prod.gnipcentral.com";
+    public static final String DEFAULT_SERVER_URL = "https://prod.gnipcentral.com";
+    public static final int DEFAULT_READ_TIMEOUT_SECONDS = 2;
 
     private boolean useGzip = false;
     private boolean tunnelOverPost = false;
     private String username;
     private String password;
     private String gnipServer;
-    private int readTimeoutMillis = 2 * 1000;
+    private int readTimeoutMillis = DEFAULT_READ_TIMEOUT_SECONDS * 1000;
 
     /**
      * Create a {@link Config} object with the specified username and password
@@ -51,14 +52,26 @@ public class Config {
         this.gnipServer = gnipServer.toString();
     }
 
+    /**
+     * Retrieves the username used to connect to Gnip.
+     * @return
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Retrieves the password used to connect to Gnip.
+     * @return 
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Retrieves the URL of the Gnip service.
+     * @return
+     */
     public String getGnipServer() {
         return gnipServer;
     }
@@ -72,14 +85,21 @@ public class Config {
      * <br/>
      * This value is configured in milliseconds.<br/>
      * <br/>
-     * The default value of this setting is 2000 milliseconds or two seconds.<br/>
+     * The default value of this setting is {@value #DEFAULT_READ_TIMEOUT_SECONDS} seconds<br/>
      * <br/> 
-     * @param readTimeoutMillis
+     * @param readTimeoutMillis the read timeout value in milliseconds
      */
     public void setReadTimeout(int readTimeoutMillis) {
         this.readTimeoutMillis = readTimeoutMillis;
     }
 
+    /**
+     * Retrieves the read timeout.<br/>
+     * <br/>
+     * The default value of this setting is {@value #DEFAULT_READ_TIMEOUT_SECONDS} seconds<br/>
+     * 
+     * @return the read timeout in milliseconds
+     */
     public int getReadTimeout() {
         return readTimeoutMillis;
     }
@@ -95,6 +115,11 @@ public class Config {
         this.tunnelOverPost = tunnelOverPost;
     }
 
+    /**
+     * Retrieves the tunnel over post flag.  The default value is <code>false</code>.
+     *
+     * @return 
+     */
     public boolean isTunnelOverPost() {
         return tunnelOverPost;
     }
@@ -109,6 +134,10 @@ public class Config {
         this.useGzip = useGzip;
     }
 
+    /**
+     * Retrieves the compression flag.  The default value is <code>false</code>.
+     * @return
+     */
     public boolean isUseGzip() {
         return useGzip;
     }

@@ -4,6 +4,9 @@ import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {"postUrl","rules"})
 @XmlRootElement(name = "filter")
@@ -48,12 +51,14 @@ public class Filter implements Resource {
         return this.rules;
     }
 
-    public void addRule(Rule rule) {
+    public Filter addRule(Rule rule) {
         getRules().add(rule);
+        return this;
     }
 
-    public void removeRule(Rule rule) {
+    public Filter removeRule(Rule rule) {
         getRules().remove(rule);
+        return this;        
     }
 
     public String getName() {

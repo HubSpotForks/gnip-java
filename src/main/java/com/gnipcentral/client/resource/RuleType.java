@@ -4,24 +4,42 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 
-@XmlType(name = "concernType")
+/**
+ * Enumeration of the rule types that are supported by Gnip {@link Filter}s.
+ */
 @XmlEnum
+@XmlType(name = "concernType")
 public enum RuleType {
 
+    /**
+     * <i>Actor</i> rules.
+     */
     @XmlEnumValue("actor")
     ACTOR("actor"),
 
-    @XmlEnumValue("tag")
-    TAG("tag"),
-
-    @XmlEnumValue("to")
-    TO("to"),
-
+    /**
+     * <i>Regarding</i> rule.
+     */
     @XmlEnumValue("regarding")
     REGARDING("regarding"),
 
+    /**
+     * <i>Source</i> rule.
+     */
     @XmlEnumValue("source")
-    SOURCE("source");
+    SOURCE("source"),
+
+    /**
+     * <i>Tag</i> rules.
+     */
+    @XmlEnumValue("tag")
+    TAG("tag"),
+
+    /**
+     * <i>To</i> rule.
+     */
+    @XmlEnumValue("to")
+    TO("to");
 
     private final String value;
 
@@ -29,6 +47,10 @@ public enum RuleType {
         value = v;
     }
 
+    /**
+     * Retrieves the String-based representation of a {@link RuleType}.
+     * @return
+     */
     public String value() {
         return value;
     }
@@ -37,12 +59,18 @@ public enum RuleType {
         return value();
     }
 
-    public static RuleType fromValue(String v) {
+    /**
+     * Parse a {@link RuleType} from its {@link String} representation.
+     * @param value
+     * @return the parsed {@link RuleType} if the String matched a valid rule type
+     * @throws IllegalArgumentException if the String failed to match a valid rule type
+     */
+    public static RuleType fromValue(String value) {
         for (RuleType c : RuleType.values()) {
-            if (c.value.equalsIgnoreCase(v)) {
+            if (c.value.equalsIgnoreCase(value)) {
                 return c;
             }
         }
-        throw new IllegalArgumentException(v);
+        throw new IllegalArgumentException("Invalid rule type '" + value + "'");
     }
 }

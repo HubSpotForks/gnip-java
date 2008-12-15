@@ -9,6 +9,21 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.GregorianCalendar;
 
+/**
+ * Model object that represents a Gnip activity.  An activity is approximately equivalent to an event
+ * that occurs on a Publisher; for example, on Twitter a tweet is an activity and digging an article is an activity
+ * on Digg.
+ * <br/>
+ * <br/>
+ * An Activity may represent a simple "notification" of an event that can be read from a Publisher's notification
+ * stream or from the notification stream for a {@link Filter} that does not support full data.
+ * <br/>
+ * <br/>
+ * An Activity may also represent full activity data for an event and can be read from a {@link Filter} that
+ * is configured to support full data.
+ * <br/>
+ * <br/>
+ */
 @XmlRootElement(name = "activity")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "activityType")
@@ -50,12 +65,26 @@ public class Activity implements Resource {
         // empty constructor for jaxb
     }
 
+    /**
+     * A basic constructor for creating an activity from an actor, often a username, and an
+     * action, often something the actor did.
+     * @param actor the actor name
+     * @param action the action performed by the actor
+     */
     public Activity(String actor, String action) {
         this.at = toXMLGregorianCalendar(new DateTime());
         this.actor = actor;
         this.action = action;
     }
 
+    /**
+     * A constructor for creating an activity from an actor, often a username, and an action, often
+     * something the actor did.  This constructor also includes a {@link Payload} of data that is
+     * associated with the activity.
+     * @param actor the actor name
+     * @param action the action performed by the actor
+     * @param payload the data associated with the activity
+     */
     public Activity(String actor, String action, Payload payload) {
         this.at = toXMLGregorianCalendar(new DateTime());
         this.actor = actor;
@@ -63,6 +92,19 @@ public class Activity implements Resource {
         this.payload = payload;
     }
 
+    /**
+     * A complete constructor for creating a full-fidelity activity.
+     *
+     * @param at the caller-provided time that represents when the activity occurred
+     * @param actor the actor name
+     * @param action the action performed by the actor
+     * @param url a URL associated with the action
+     * @param to to whom or to what the activity refers
+     * @param regarding what the activity regards
+     * @param source the source of the activity 
+     * @param tags any tags associated with the activity; for example, tags set on a photo
+     * @param payload the data associated with the activity
+     */
     public Activity(DateTime at, String actor, String action, String url, String to,
                     String regarding, String source, String tags, Payload payload) {
         this.at = toXMLGregorianCalendar(at);
@@ -76,10 +118,18 @@ public class Activity implements Resource {
         this.payload = payload;
     }
 
+    /**
+     * Retrieves the time at which the activity occurred.
+     * @return the time
+     */
     public DateTime getAt() {
         return fromXMLGregorianCalendar(at);
     }
 
+    /**
+     * Retrieves the actor that generated the activity
+     * @return the actor
+     */
     public String getActor() {
         return actor;
     }
@@ -112,6 +162,11 @@ public class Activity implements Resource {
         return payload;
     }
 
+    /**
+     * Retrieves the value from the {@link Activity} that is associated with the {@link RuleType}.
+     * @param ruleType the rule type
+     * @return the value associated with the rule type
+     */
     public String getValue(RuleType ruleType) {
         switch (ruleType) {
             case ACTOR:

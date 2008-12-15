@@ -8,7 +8,11 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.InputStream;
 
-public class GnipSchema {
+/**
+ * A wrapper that provides access to Gnip's XSD document; this class is intended to be used for JAXB marshalling
+ * and should not be used by client code.
+ */
+class GnipSchema {
 
     public final static Schema schema;
 

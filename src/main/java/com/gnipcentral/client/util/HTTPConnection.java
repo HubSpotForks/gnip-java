@@ -15,8 +15,23 @@ import java.util.zip.GZIPInputStream;
 import java.util.Properties;
 import java.util.Date;
 
+/**
+ * Basic abstraction atop an HTTP connection that is used to handle low-level Gnip <> HTTP protocol interaction.
+ * This class is used by the {@link com.gnipcentral.client.GnipConnection} to communicate with a Gnip server
+ * and is not intended to be used by clients.
+ * <br/>
+ * <br/>
+ * This class sets several headers on the request, in part based on the how the connection is configured
+ * by the {@link com.gnipcentral.client.Config} instance.
+ * <ul>
+ * <li><code>Content-Encoding</code> and <code>Accept-Encoding</code> are set if {@link Config#setUseGzip(boolean)} is <code>true</code></li>
+ * <li><code>User-Agent</code> is set to a Java-client value that includes the version of the client library</li>
+ * <li><code>Authorization</code> is set using basic authentication credentials</li>
+ * </ul> 
+ */
 public class HTTPConnection {
 
+    private static final Logger LOG = LoggerFactory.getInstance();
     private static final String USER_AGENT_STRING;
 
     static {
@@ -40,19 +55,35 @@ public class HTTPConnection {
         }
     }
 
-    private final Logger LOG = LoggerFactory.getInstance();
     private final Config config;
 
+    /**
+     * Create a new {@link HTTPConnection} with the provided configuration.
+     * @param config the configuration for the connection
+     */
     public HTTPConnection(Config config) {
         this.config = config;
     }
 
+    /**
+     * Send an HTTP request of type GET to the given URL.
+     * @param urlString the URL to receive the GET
+     * @return the {@link InputStream} from the response
+     * @throws IOException if an exception occurs communicating with the server
+     */
     public InputStream doGet(String urlString) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.GET);
         LOG.log("HTTP GET to %s\n", urlString);
         return getData(urlConnection);
     }
 
+    /**
+     * Send an HTTP request of type POST to the given URL with the given data for the request body.
+     * @param urlString the URL to receive the POST
+     * @param data the bytes to send in the request body
+     * @return the {@link InputStream} from the response
+     * @throws IOException if an exception occurs communicating with the server
+     */
     public InputStream doPost(String urlString, byte[] data) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.POST);
         LOG.log("HTTP POST to %s\n", urlString);
@@ -61,6 +92,13 @@ public class HTTPConnection {
         return transferData(data, urlConnection);
     }
 
+    /**
+     * Send an HTTP request of type PUT to the given URL with the given data for the request body.
+     * @param urlString the URL to receive the PUT
+     * @param data the bytes to send in the request body
+     * @return the {@link InputStream} from the response
+     * @throws IOException if an exception occurs communicating with the server
+     */
     public InputStream doPut(String urlString, byte[] data) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.PUT);
         LOG.log("HTTP PUT to %s\n", urlString);
@@ -69,6 +107,12 @@ public class HTTPConnection {
         return transferData(data, urlConnection);
     }
 
+    /**
+     * Send an HTTP request of type DELETE to the given URL.
+     * @param urlString the URL to receive the DELETE
+     * @return the {@link InputStream} from the response
+     * @throws IOException if an exception occurs communicating with the server
+     */
     public InputStream doDelete(String urlString) throws IOException {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.DELETE);
         LOG.log("HTTP DELETE to %s\n", urlString);
