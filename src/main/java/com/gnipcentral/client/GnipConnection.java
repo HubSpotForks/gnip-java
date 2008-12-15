@@ -214,7 +214,7 @@ public class GnipConnection {
     public void update(Publisher publisher, Filter filter, Rules rules) throws GnipException {
         try {
             byte[] data = convertToBytes(rules);
-            connection.doPost(getRulesURL(publisher.getName(), filter.getName()), data);
+            connection.doPost(getRulesUrl(publisher.getName(), filter.getName()), data);
         }
         catch(IOException e) {
             throw new GnipException("Exception occurred updating Rule", e);
