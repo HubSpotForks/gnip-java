@@ -3,6 +3,7 @@ package com.gnipcentral.client;
 import com.gnipcentral.client.resource.Filter;
 import com.gnipcentral.client.resource.Rule;
 import com.gnipcentral.client.resource.RuleType;
+import com.gnipcentral.client.resource.Rules;
 
 import java.util.List;
 
@@ -139,6 +140,35 @@ public class FilterTestCase extends GnipTestCase {
 
             assertEquals(RuleType.ACTOR, rules.get(idx).getType());
             assertEquals("jojo", rules.get(idx).getValue());
+        }
+        finally {
+            gnipConnection.delete(localPublisher, filterToCreate);
+        }
+    }
+
+    public void testBatchAddRulesToFilter() throws Exception {
+        try {
+            gnipConnection.create(localPublisher, filterToCreate);
+
+            waitForServerWorkToComplete();
+
+            Rule r1 = new Rule(RuleType.ACTOR, "jojo"),
+                 r2 = new Rule(RuleType.ACTOR, "moe"),
+                 r3 = new Rule(RuleType.ACTOR, "barney");                                        
+
+            Rules rules = new Rules();
+            rules.addRule(r1).addRule(r2).addRule(r3);
+
+            gnipConnection.update(localPublisher, filterToCreate, rules);
+
+            waitForServerWorkToComplete();
+
+            Filter updated = gnipConnection.getFilter(localPublisher.getName(), filterToCreate.getName());
+            List<Rule> updatedRules = updated.getRules();
+            assertEquals(4, updatedRules.size());
+            assertTrue(updatedRules.contains(r1));
+            assertTrue(updatedRules.contains(r2));
+            assertTrue(updatedRules.contains(r3));
         }
         finally {
             gnipConnection.delete(localPublisher, filterToCreate);
