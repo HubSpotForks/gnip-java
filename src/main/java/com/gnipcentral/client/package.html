@@ -1,10 +1,16 @@
 <html>
 <body>
 This package contains classes used by a client to establish and use a client connection to Gnip.
-
+<br/>
+<br/>
 The Gnip API supports two primary usage patterns -- publishing data into Gnip and
 subscribing to receive data from Gnip.  Depending on the usage, a Gnip user may be one, the other,
-or both.  Data is published into a Gnip {@link com.gnipcentral.client.resource.Publisher} in the form
+or both.  Both API usages deal with streams of either activity or notification data.  A Publisher provides
+a complete view of activity data flowing through it, and Filters are used to configure streams that
+express interet in a particular subset of activity data flowing through the Publisher.
+<br/>
+<br/>
+Data is published into a Gnip  {@link com.gnipcentral.client.resource.Publisher} in the form
 of a set of {@link com.gnipcentral.client.resource.Activity activities} that
 represent events that happened on the Publisher.  Events are Publisher specific and could be an article "digg"
 on Digg, a tweet from Twitter, or a train arrival from BART.  A Publisher makes data available in the form
