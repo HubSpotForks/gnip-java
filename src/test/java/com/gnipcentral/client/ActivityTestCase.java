@@ -14,18 +14,49 @@ import org.joda.time.DateTime;
  */
 public class ActivityTestCase extends GnipTestCase {
 
-    public void testPublishActivityToGnip() throws Exception {
-        gnipConnection.publish(localPublisher, activities);
-    }
-
     public void testPayloadEncodeDecode() throws Exception {
         String body = "foo";
         String decodedRaw = "bar";
         String raw = encodePayload(decodedRaw);
 
-        Payload payload = new Payload(body, decodedRaw, false);
+        // Payload created with an encoded "raw"
+        Payload payload = new Payload(body, decodedRaw);
+        Activity activity = createActivityWithPayload(payload);
+
+        Activity decoded = Translator.parseActivity(Translator.marshall(activity));
+        assertEquals(body, payload.getBody());
         assertEquals(raw, payload.getRaw());
         assertEquals(decodedRaw, payload.getDecodedRaw());
+        assertEquals(decoded.getPayload().getBody(), payload.getBody());
+        assertEquals(decoded.getPayload().getRaw(), payload.getRaw());
+        assertEquals(decoded.getPayload().getDecodedRaw(), payload.getDecodedRaw());
+
+        // Payload created with an un-encoded "raw"
+        payload = new Payload(body, decodedRaw, false);
+        activity = createActivityWithPayload(payload);
+
+        decoded = Translator.parseActivity(Translator.marshall(activity));
+        assertEquals(body, payload.getBody());
+        assertEquals(raw, payload.getRaw());
+        assertEquals(decodedRaw, payload.getDecodedRaw());
+        assertEquals(decoded.getPayload().getBody(), payload.getBody());
+        assertEquals(decoded.getPayload().getRaw(), payload.getRaw());
+        assertEquals(decoded.getPayload().getDecodedRaw(), payload.getDecodedRaw());
+
+        payload = new Payload(body, raw, true);
+        activity = createActivityWithPayload(payload);
+
+        decoded = Translator.parseActivity(Translator.marshall(activity));
+        assertEquals(body, payload.getBody());
+        assertEquals(raw, payload.getRaw());
+        assertEquals(decodedRaw, payload.getDecodedRaw());
+        assertEquals(decoded.getPayload().getBody(), payload.getBody());
+        assertEquals(decoded.getPayload().getRaw(), payload.getRaw());
+        assertEquals(decoded.getPayload().getDecodedRaw(), payload.getDecodedRaw());
+    }
+
+    public void testPublishActivityToGnip() throws Exception {
+        gnipConnection.publish(localPublisher, activities);
     }
 
     public void testPublishActivityWithPayloadToGnip() throws Exception {
@@ -123,5 +154,9 @@ public class ActivityTestCase extends GnipTestCase {
         finally {
             gnipConnection.delete(localPublisher, existingFilter);
         }
+    }
+
+    private Activity createActivityWithPayload(Payload payload) {
+        return new Activity("jojo", "some-simple-update", payload);
     }    
 }

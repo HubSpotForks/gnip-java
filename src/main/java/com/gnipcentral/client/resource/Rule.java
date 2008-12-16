@@ -2,6 +2,10 @@ package com.gnipcentral.client.resource;
 
 import javax.xml.bind.annotation.*;
 
+/**
+ * A model object that represents a Gnip Rule.  A set of rules are set on a {@link Filter} and are used to match
+ * {@link Activity} objects that flow through a {@link Publisher publishers}.
+ */
 @XmlRootElement(name = "rule")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Rule implements Resource {
@@ -18,15 +22,28 @@ public class Rule implements Resource {
         // private constructor for jaxb
     }
 
+    /**
+     * A simple constructor.
+     * @param type the rule type
+     * @param value the rule's value
+     */
     public Rule(RuleType type, String value) {
         this.type = type;
         this.value = value;
     }
 
+    /**
+     * Retrieves the rule's type.
+     * @return the type
+     */
     public RuleType getType() {
         return type;
     }
 
+    /**
+     * Retrieves the rule's value.
+     * @return the value
+     */
     public String getValue() {
         return value;
     }

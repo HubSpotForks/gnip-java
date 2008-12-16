@@ -24,7 +24,10 @@ import java.util.Date;
  * This class sets several headers on the request, in part based on the how the connection is configured
  * by the {@link com.gnipcentral.client.Config} instance.
  * <ul>
- * <li><code>Content-Encoding</code> and <code>Accept-Encoding</code> are set if {@link Config#setUseGzip(boolean)} is <code>true</code></li>
+ * <li>
+ * <code>Content-Encoding</code> and <code>Accept-Encoding</code> are set if {@link Config#setUseGzip(boolean)} is
+ * <code>true</code>
+ * </li>
  * <li><code>User-Agent</code> is set to a Java-client value that includes the version of the client library</li>
  * <li><code>Authorization</code> is set using basic authentication credentials</li>
  * </ul> 

@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Collections;
 import java.util.LinkedList;
 
+/**
+ * Package-protected abstraction for loading services from <code>META-INF/services</code>.  This
+ * class is not intended for external use.
+ */
 class ServiceLoader {    
     
     static List<Class> loadServices(Class service) {

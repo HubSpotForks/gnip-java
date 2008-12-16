@@ -15,24 +15,33 @@ import java.util.Date;
 import javax.xml.bind.JAXBException;
 
 /**
- * Represents a client connection to a Gnip service.  It encapsulates all protocol
- * level interactions with a Gnip service and provides a higher-level abstraction for writing data to and reading
- * data from Gnip.
+ * Represents a client connection to a Gnip service.  This class encapsulates all protocol
+ * level interactions with a Gnip service and provides a higher-level abstraction for writing
+ * data to and reading data from Gnip.
  * <br/>
  * <br/>
- * Consumers of data will be specifically interested in:
+ * Users interested in consuming data from Gnip will be specifically interested in reading
+ * notifications from a Publisher and/or either notifications or activities from a Filter using:
  * <ul>
- * <li><b>Reading notifications for a Publisher</b></li>
- * <li><b>Creating a Filter</b></li>
- * <li><b>Reading activities for a fulldata Filter</b></li>
- * <li><b>Reading notifications for a non-fulldata Filter</b></li> 
- * </ul>
+ * <li>{@link #getNotifications(com.gnipcentral.client.resource.Publisher)} or {@link #getNotifications(com.gnipcentral.client.resource.Publisher, org.joda.time.DateTime)}
+ *     to read notifications from a Publisher
+ * </li>
+ * <li>{@link #create(com.gnipcentral.client.resource.Publisher, com.gnipcentral.client.resource.Filter)} to create a {@link Filter}</li>
+ * <li>{@link #getActivities(com.gnipcentral.client.resource.Publisher, com.gnipcentral.client.resource.Filter)} or {@link #getActivities(com.gnipcentral.client.resource.Publisher, com.gnipcentral.client.resource.Filter, org.joda.time.DateTime)}
+ *     to read activities from a Filter (or notifications if the Filter doesn't support full-data.
+ * </li> 
  * <br/>
  * <br/>
- * Publishers of data will be specifically interested in:
+ * Users interested in publishing data into Gnip will be specifically interested in creating Publishers
+ * and sending activities to publishers using:
  * <ul>
- * <li><b>Creating a Publisher</b></li>
- * <li><b>Publishing activities to the Publisher</b></li> 
+ * <li>
+ * {@link #create(com.gnipcentral.client.resource.Publisher)} to create a {@link Publisher}.
+ * </li>
+ * <li>
+ * {@link #publish(com.gnipcentral.client.resource.Publisher, com.gnipcentral.client.resource.Activities)} to publish
+ * activities into a {@link Publisher}
+ * </li>
  * </ul>
  */
 public class GnipConnection {
@@ -150,7 +159,7 @@ public class GnipConnection {
      * Retrieves the Filter named {@link com.gnipcentral.client.resource.Filter#getName()} from the {@link Publisher}
      * named {@link com.gnipcentral.client.resource.Publisher#getName()}
      * @param publisher the publisher that owns the filter
-     * @param filter the filter to get
+     * @param filter the filter to retrieve
      * @return the {@link Filter} if it exists
      * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
      *                       or if another error occurred. 
@@ -165,8 +174,16 @@ public class GnipConnection {
         }
 
         return getFilter(publisher.getName(), filter.getName());
-    }    
+    }
 
+    /**
+     * Retrieves the Filter named {@param filterName} from the {@link Publisher} named {@param publisherName}.
+     * @param publisherName the name of the publisher
+     * @param filterName the filter to retrieve
+     * @return the {@link Filter} if it exists
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred.
+     */
     public Filter getFilter(String publisherName, String filterName) throws GnipException {
         try {
             InputStream response = connection.doGet(getFilterUrl(publisherName, filterName));
@@ -180,6 +197,23 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Update the {@link Filter} associated with the {@link Publisher}.  As practiced in the
+     * <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST style</a>, this call
+     * updates the represetntation of the given Filter by replacing the one that already exists.  It
+     * <i>does not</i> do a merge of the two Filter documents.
+     * <br/>
+     * <br/>
+     * To do incremental updates of a {@link Filter}, use
+     * {@link #update(com.gnipcentral.client.resource.Publisher, com.gnipcentral.client.resource.Filter, com.gnipcentral.client.resource.Rule)} or
+     * {@link #update(com.gnipcentral.client.resource.Publisher, com.gnipcentral.client.resource.Filter, com.gnipcentral.client.resource.Rules)} to
+     * add rules to an existing Filter. 
+     *
+     * @param publisher the publisher that owns the filter
+     * @param filter the filter to update
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred. 
+     */
     public void update(Publisher publisher, Filter filter) throws GnipException {
         try {
             byte[] data = convertToBytes(filter);
@@ -198,6 +232,14 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Update the {@link Filter} by adding a <i>single</i> rule to it. 
+     * @param publisher the publisher that owns the filter
+     * @param filter the filter to update
+     * @param rule the rule to add to the filter
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred.
+     */
     public void update(Publisher publisher, Filter filter, Rule rule) throws GnipException {
         try {
             byte[] data = convertToBytes(rule);
@@ -211,6 +253,14 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Update the {@link Filter} by bulk adding a {@link Rules} document containing many {@link Rule}s.  
+     * @param publisher the publisher that owns the filter
+     * @param filter the filter to update
+     * @param rules the set of rules to add to the filter
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred.
+     */
     public void update(Publisher publisher, Filter filter, Rules rules) throws GnipException {
         try {
             byte[] data = convertToBytes(rules);
@@ -224,6 +274,13 @@ public class GnipConnection {
         }        
     }
 
+    /**
+     * Delete the filter {@link Filter} from the {@link Publisher}.
+     * @param publisher the publisher from which to delete the filter
+     * @param filter the filter to delete
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred.
+     */
     public void delete(Publisher publisher, Filter filter) throws GnipException {
         try {
             if(config.isTunnelOverPost()) {
@@ -238,6 +295,14 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Delete the rule from the {@link Filter} associated with the {@link Publisher}.    
+     * @param publisher the publisher from which to delete a filter's rule
+     * @param filter the filter from which to remove a rule
+     * @param rule the rule to remove
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred.
+     */
     public void delete(Publisher publisher, Filter filter, Rule rule) throws GnipException {
         try {
             String url = getRulesDeleteUrl(publisher, filter, rule);
@@ -253,6 +318,16 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Publish {@link Activity} data in an {@link Activities} model to a {@link Publisher}.  In order to publish
+     * activities, the credentials set in the {@link Config} instance associated with this {@link GnipConnection}
+     * must own the publisher.
+     *
+     * @param publisher the publisher to publish activities to
+     * @param activities the activities to publish
+     * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
+     *                       or if another error occurred.
+     */
     public void publish(Publisher publisher, Activities activities) throws GnipException {
         if (activities == null || activities.getActivities().isEmpty())
             return;
@@ -269,9 +344,29 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Retrieves the {@link Activity} data from the given {@link Publisher} for the current
+     * activity bucket.  This method expects that the
+     * given {@param publisher} has a public timeline and makes full activity data available to the
+     * cerdentials set in the {@link Config} instance used to configure this {@link GnipConnection}.
+     * Note, not all {@link Publisher publishers} have a timeline of activity data; for an up-to-date
+     * list of publishers that make such data available, check the <a href="https://prod.gnipcentral.com">
+     * Gnip Developer</a> website.  Additionally, not all publishers provide access to complete
+     * activity data and instead typically just provide access to notifications.
+     * <br/>
+     * <br/>
+     * Most Gnip users will need to use {@link #getNotifications(com.gnipcentral.client.resource.Publisher)}
+     * or {@link #getNotifications(com.gnipcentral.client.resource.Publisher, org.joda.time.DateTime)} to
+     * get the notifications for a {@link Publisher}.
+     *
+     * @param publisher the publisher whose activities to get
+     * @return the {@link Activities} model, which contains a set of {@link Activity activities}.
+     * @throws GnipException if the user doesn't have access to activity data for the Publisher, if there were problems
+     *                       authenticating with the Gnip server, or if another error occurred.
+     */
     public Activities getActivities(Publisher publisher) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivityUrl(publisher, false));
+            InputStream inputStream = connection.doGet(getActivityUrl(publisher, false, null));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -282,9 +377,37 @@ public class GnipConnection {
         }
     }
 
-    public Activities getActivities(Publisher publisher, DateTime date) throws GnipException {
+    /**
+     * Retrieves the {@link Activity} data from the given {@link Publisher} for an activity bucket at a given date.
+     *
+     * This method expects that the given {@param publisher} has a public timeline and that the publisher makes
+     * full activity data available to the cerdentials set in the {@link Config} instance used to configure
+     * this {@link GnipConnection}.
+     *
+     * Note, not all {@link Publisher publishers} have a timeline of activity data.
+     *
+     * For an up-to-date list of publishers that have a public timeline, see the
+     * <a href="https://prod.gnipcentral.com"> Gnip Developer</a> website.
+     *
+     * Additionally, not all publishers provide access to complete
+     * activity data and instead typically just provide access to notifications.
+     * <br/>
+     * <br/>
+     * Most Gnip users will need to use {@link #getNotifications(com.gnipcentral.client.resource.Publisher)}
+     * or {@link #getNotifications(com.gnipcentral.client.resource.Publisher, org.joda.time.DateTime)} to
+     * get the notifications for a {@link Publisher}.
+     *
+     * @param publisher the publisher whose activities to get
+     * @param dateTime the timestamp of the activity bucket to retrieve 
+     * @return the {@link Activities} model, which contains a set of {@link Activity activities} or an empty
+     *         {@link Activities} object if no notifications where found in the activity bucket
+     *         with the provided {@param dateTime timestamp}.
+     * @throws GnipException if the user doesn't have access to activity data for the Publisher, if there were problems
+     *                       authenticating with the Gnip server, or if another error occurred.
+     */
+    public Activities getActivities(Publisher publisher, DateTime dateTime) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivityUrl(publisher, false, date));
+            InputStream inputStream = connection.doGet(getActivityUrl(publisher, false, dateTime));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -295,9 +418,26 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Retrieves the {@link Activity} notifications from the given {@link Publisher} for the current
+     * notification bucket.  This method can be invoked against all publishers that have a public timeline.
+     *
+     * For an up-to-date list of publishers that have a public timeline, see the
+     * <a href="https://prod.gnipcentral.com"> Gnip Developer</a> website.
+     *
+     * Remember, notifications are just that -- notifications that an activity occurred on a {@link Publisher}.
+     * A notification <i>does not</i> contain an activity's complete data.  To obtain full activity data,
+     * use a {@link Filter} that has {@link Filter#setFullData(boolean)}.
+     *
+     * @param publisher the publisher whose notifications to get
+     * @return the {@link Activities} model, which contains a set of {@link Activity} objects, or an empty
+     *         {@link Activities} object if no notifications were found in the current notification bucket.
+     * @throws GnipException if the publisher doesn't exist, if there were problems authenticating with the Gnip
+     *                       server, or if another error occurred.
+     */
     public Activities getNotifications(Publisher publisher) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivityUrl(publisher, true));
+            InputStream inputStream = connection.doGet(getActivityUrl(publisher, true, null));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -308,9 +448,29 @@ public class GnipConnection {
         }
     }
 
-    public Activities getNotifications(Publisher publisher, DateTime date) throws GnipException {
+    /**
+     * Retrieves the {@link Activity} notifications from the given {@link Publisher} for the notification
+     * bucket at the given date.
+     *
+     * This method can be invoked against all publishers that have a public timeline.
+     *
+     * For an up-to-date list of publishers that have a public timeline, see the
+     * <a href="https://prod.gnipcentral.com"> Gnip Developer</a> website.
+     *
+     * Remember, notifications are just that -- notifications that an activity occurred on a {@link Publisher}.
+     * A notification <i>does not</i> contain an activity's complete data.  To obtain full activity data,
+     * use a {@link Filter} that has {@link Filter#setFullData(boolean)}.
+     *
+     * @param publisher the publisher whose notifications to get
+     * @param dateTime the timestamp of the notification bucket to retrieve
+     * @return the {@link Activities} model, which contains a set of {@link Activity} objects, or an empty
+     *         {@link Activities} object if no notifications were found in the current notification bucket.
+     * @throws GnipException if the publisher doesn't exist, if there were problems authenticating with the Gnip
+     *                       server, or if another error occurred.
+     */
+    public Activities getNotifications(Publisher publisher, DateTime dateTime) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivityUrl(publisher, true, date));
+            InputStream inputStream = connection.doGet(getActivityUrl(publisher, true, dateTime));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -321,9 +481,22 @@ public class GnipConnection {
         }
     }
 
+    /**
+     * Retrieves either the notifications or activities from the current bucket for the given {@link Publisher}
+     * and {@link Filter} based on whether the filter supports full data.  See the {@link Filter} class for more information
+     * about whether a Filter supports notifications or activities.  If the Filter supports notifications, the
+     * {@link Activities} object returned here will just have activity notifications.
+     *
+     * @param publisher the publisher that owns the filter
+     * @param filter the filter whose notifications or activities to retrieve
+     * @return the notifications or activities in the current bucket or an empty {@link Activities} object if no
+     *         notifications or activities were found in the current bucket.
+     * @throws GnipException if the publisher or filter don't exist, if there were problems authenticating with the Gnip
+     *                       server, or if another error occurred.
+     */
     public Activities getActivities(Publisher publisher, Filter filter) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivitiesUrl(publisher, filter));
+            InputStream inputStream = connection.doGet(getActivityUrl(publisher, filter, null));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -334,9 +507,23 @@ public class GnipConnection {
         }
     }
 
-    public Activities getActivities(Publisher publisher, Filter filter, DateTime date) throws GnipException {
+    /**
+     * Retrieves either the notifications or activities from the bucket with the given timestamp for the given {@link Publisher}
+     * and {@link Filter} based on whether the filter supports full data.  See the {@link Filter} class for more information
+     * about whether a Filter supports notifications or activities.  If the Filter supports notifications, the
+     * {@link Activities} object returned here will just have activity notifications.
+     *
+     * @param publisher the publisher that owns the filter
+     * @param filter the filter whose notifications or activities to retrieve
+     * @param dateTime the timestamp of the bucket whose notifications or activities to retrieve 
+     * @return the notifications or activities in the current bucket or an empty {@link Activities} object if no
+     *         notifications or activities were found in the current bucket.
+     * @throws GnipException if the publisher or filter don't exist, if there were problems authenticating with the Gnip
+     *                       server, or if another error occurred.
+     */
+    public Activities getActivities(Publisher publisher, Filter filter, DateTime dateTime) throws GnipException {
         try {
-            InputStream inputStream = connection.doGet(getActivitiesUrl(publisher, filter, date));
+            InputStream inputStream = connection.doGet(getActivityUrl(publisher, filter, dateTime));
             return Translator.parseActivities(new InputSource(inputStream));
         }
         catch(IOException e) {
@@ -413,24 +600,16 @@ public class GnipConnection {
         return getPublisherUrl(publisher.getName()) + "/activity";
     }
 
-    private String getActivityUrl(Publisher publisher, boolean isNotification) {
-        String endpoint = isNotification ? "notification" : "activity";
-        return getPublisherUrl(publisher.getName()) + "/" + endpoint + "/current.xml";
-    }
-
     private String getActivityUrl(Publisher publisher, boolean isNotification, DateTime date) {
+        String bucket = date == null ? "current" : getDateString(date);
         String endpoint = isNotification ? "notification" : "activity";
-        return getPublisherUrl(publisher.getName()) + "/" + endpoint + "/" + getDateString(date) + ".xml";
+        return getPublisherUrl(publisher.getName()) + "/" + endpoint + "/" + bucket + ".xml";
     }
 
-    private String getActivitiesUrl(Publisher publisher, Filter filter) {
+    private String getActivityUrl(Publisher publisher, Filter filter, DateTime date) {
+        String bucket = date == null ? "current" : getDateString(date);
         String endpoint = filter.isFullData() ? "activity" : "notification";
-        return getFilterCreateUrl(publisher.getName()) + "/" + filter.getName() + "/" + endpoint + "/current.xml";
-    }
-
-    private String getActivitiesUrl(Publisher publisher, Filter filter, DateTime date) {
-        String endpoint = filter.isFullData() ? "activity" : "notification";
-        return getFilterCreateUrl(publisher.getName()) + "/" + filter.getName() + "/" + endpoint + "/" + getDateString(date) + ".xml";
+        return getFilterCreateUrl(publisher.getName()) + "/" + filter.getName() + "/" + endpoint + "/" + bucket + ".xml";
     }
 
     private String tunnelEditOverPost(String url) {
