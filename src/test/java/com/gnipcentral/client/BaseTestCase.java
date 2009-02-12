@@ -63,7 +63,8 @@ public abstract class BaseTestCase extends TestCase {
         assertEquals(object1.hashCode(), object2.hashCode());
     }
 
-    protected void assertContains(Object expected, java.util.Collection collection) {
+    @SuppressWarnings("unchecked")
+    protected void assertContains(Object expected, Collection collection) {
         String message = "Object: " + expected + " is not in " + collection;
         if (expected != null && collection == null) fail(message);
         if (expected == null && collection != null) fail(message);
@@ -75,12 +76,13 @@ public abstract class BaseTestCase extends TestCase {
         fail(message);
     }
 
+    @SuppressWarnings("unchecked")
     protected void assertDoesNotContain(Object object, Collection collection) {
         if (collection == null) return;
         assertFalse("Object " + object + " is in collection " + collection, collection.contains(object));
     }
 
-    protected void assertIsA(Class expectedClazz, Object instance) {
+    protected void assertIsA(Class<?> expectedClazz, Object instance) {
         assertEquals(expectedClazz, instance.getClass());
     }
 

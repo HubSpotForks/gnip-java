@@ -69,6 +69,30 @@ public class HTTPConnection {
     }
 
     /**
+     * Send a HTTP request of type HEAD to get the Date HTTP
+     * response header which can be used to access the time on
+     * the remote server. Then, compare that to the local time
+     * on this system to determine the time offset in milliseconds.
+     * @return current server time delta in milliseconds.
+     */
+    public long getServerTimeDelta() throws IOException {
+        // setup GET request to server root URL
+        String serverRootUrlString = config.getGnipServer() + "/";
+        HttpURLConnection urlConnection = getConnection(serverRootUrlString, HTTPMethod.GET);
+        LOG.log("HTTP GET to %s\n", serverRootUrlString);
+        // save local system time
+        long localSystemTime = System.currentTimeMillis();
+        // make request to server, but ignore response
+        dumpData(urlConnection);
+        // adjust local system time
+        localSystemTime = (localSystemTime + System.currentTimeMillis()) / 2;
+        // use HTTP Date response header to access remote server time
+        long remoteServerTime = urlConnection.getDate();
+        return (remoteServerTime != 0L ? remoteServerTime - localSystemTime : 0L);
+    }
+    
+
+    /**
      * Send an HTTP request of type GET to the given URL.
      * @param urlString the URL to receive the GET
      * @return the {@link InputStream} from the response
@@ -148,7 +172,7 @@ public class HTTPConnection {
                 errorMessage = error.getMessage();
             }
             catch(JAXBException e) {
-                LOG.log("Exception occurred unmarshalling error message %s", e.getMessage());
+                LOG.log("Exception occurred unmarshalling error message %s\n", e.toString());
             }
             throw new IOException("Error with request code: " + responseCode + " message: " + responseMessage + " " + errorMessage);
         }
@@ -194,6 +218,17 @@ public class HTTPConnection {
         return resultStream;
     }
 
+    private void dumpData(HttpURLConnection urlConnection) throws IOException {
+        try {
+            urlConnection.connect();
+            InputStream stream = urlConnection.getInputStream();
+            while (stream.read() != -1);
+            IOUtils.closeQuietly(stream);
+        } catch (FileNotFoundException e) {
+        }
+        urlConnection.disconnect();
+    }
+
     private HttpURLConnection getConnection(String urlString, HTTPMethod method) throws IOException {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -201,7 +236,7 @@ public class HTTPConnection {
         urlConnection.addRequestProperty("Content-Type", "application/xml");
         urlConnection.addRequestProperty("Authorization", "Basic " + new String(Base64.encodeBase64(getGnipCredentials()), Charset.forName("UTF-8")));
         urlConnection.addRequestProperty("User-Agent", USER_AGENT_STRING);
-        urlConnection.setConnectTimeout(2000);
+        urlConnection.setConnectTimeout(config.getReadTimeout());
         urlConnection.setReadTimeout(config.getReadTimeout());
         if (config.isUseGzip()) {
             urlConnection.addRequestProperty("Accept-Encoding", "gzip");

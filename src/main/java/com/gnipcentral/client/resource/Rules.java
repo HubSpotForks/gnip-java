@@ -9,18 +9,16 @@ import java.util.Collection;
  * Container class that wraps a set of {@link Rule}s.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "")
 @XmlRootElement(name = "rules")
 public class Rules implements Resource {
 
     @XmlElement(name = "rule", required = true, type = Rule.class)
-    private HashSet<Rule> rules;
+    private Set<Rule> rules;
 
     /**
      * Default constructor.
      */
     public Rules() {
-        rules = new HashSet<Rule>();
     }
 
     /**
@@ -28,20 +26,26 @@ public class Rules implements Resource {
      * @param rules the rules to start with
      */
     public Rules(Rule ... rules) {
-        this();
-        assert rules != null;        
-        for(Rule rule : rules) {
-            addRule(rule);
+        this.rules = new HashSet<Rule>();
+        for (Rule rule : rules) {
+            this.rules.add(rule);
         }
     }
 
     /**
      * Get the set of {@link Rule}s.
-     * @return
+     * @return the set of rules.
      */
     public Set<Rule> getRules() {
-        assert rules != null;
         return rules;
+    }
+
+    /**
+     * Set the set of {@link Rule}s.
+     * @param rules the set of rules.
+     */
+    public void setRules(Set<Rule> rules) {
+        this.rules = rules;
     }
 
     /**
@@ -49,8 +53,10 @@ public class Rules implements Resource {
      * @param rule
      * @return a reference to this object
      */
-    public Rules addRule(Rule rule) {
-        assert rules != null;
+    public Rules add(Rule rule) {
+        if (rules == null) {
+            rules = new HashSet<Rule>();            
+        }
         rules.add(rule);
         return this;
     }
@@ -60,9 +66,13 @@ public class Rules implements Resource {
      * @param rules the
      * @return a reference to this object
      */
-    public Rules addRules(Collection<Rule> rules) {
-        assert rules != null;
-        this.rules.addAll(rules);
+    public Rules addAll(Collection<Rule> rules) {
+        if (rules != null) {
+            if (this.rules == null) {
+                this.rules = new HashSet<Rule>();            
+            }
+            this.rules.addAll(rules);
+        }
         return this;
     }
 }

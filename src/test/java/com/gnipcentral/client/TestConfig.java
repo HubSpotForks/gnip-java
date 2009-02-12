@@ -43,14 +43,14 @@ final class TestConfig {
     private final String password;
     private final String host;
     private final String publisher;
-    private final Integer idleSeconds;
+    private final Integer idleMillis;
 
-    private TestConfig(String username, String password, String host, String publisher, Integer idleSeconds) {
+    private TestConfig(String username, String password, String host, String publisher, Integer idleMillis) {
         this.username = username;
         this.password = password;
         this.host = host;
         this.publisher = publisher;
-        this.idleSeconds = idleSeconds;
+        this.idleMillis = idleMillis;
     }
 
     public String getUsername() {
@@ -69,7 +69,7 @@ final class TestConfig {
         return publisher;
     }
 
-    public Integer getIdleSeconds() {
-        return idleSeconds;
+    public Integer getIdleMillis() {
+        return idleMillis;
     }
 }

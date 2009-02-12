@@ -11,13 +11,11 @@ import javax.xml.bind.annotation.*;
 public class Rule implements Resource {
 
     @XmlAttribute(required = true)
-    @XmlSchemaType(name = "type")
     private RuleType type;
-
-    @XmlAttribute(name = "value", required = true)
+    @XmlValue
     private String value;
 
-    @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressWarnings("unused")
     private Rule() {
         // private constructor for jaxb
     }
@@ -48,7 +46,10 @@ public class Rule implements Resource {
         return value;
     }
 
-    @SuppressWarnings({"RedundantIfStatement"})
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -61,6 +62,10 @@ public class Rule implements Resource {
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
     public int hashCode() {
         int result;
         result = (type != null ? type.hashCode() : 0);

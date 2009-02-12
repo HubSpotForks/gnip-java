@@ -21,10 +21,10 @@ To test the library, create the file:
 which holds the username, password, and host properties used to
 connect to Gnip.  This file should be of the format:
 
-gnip.username=darthvader
+gnip.username=darthvader@deathstar.mil
 gnip.password=goempire
 gnip.host=https://prod.gnipcentral.com
-gnip.publisher=apublisheryouown
+gnip.publisher=mypublisher
 # the number of seconds to wait between each test's setup / teardown
 gnip.idlesecs=2 
 

@@ -46,7 +46,7 @@ public class LoggerFactory {
         if(LOG != null)
             return LOG;
 
-        Class serviceImpl = null;
+        Class<?> serviceImpl = null;
         String loggerProperty = System.getProperty(LOGGER_CLASS_SYSTEM_PROPERTY);
         if(loggerProperty != null) {
             try {
@@ -56,7 +56,7 @@ public class LoggerFactory {
                 System.err.printf("Unable to create logger of type %s due to exception %s\n", loggerProperty, e.getMessage());                
             }
         } else {
-            List<Class> serviceImpls = ServiceLoader.loadServices(Logger.class);
+            List<Class<?>> serviceImpls = ServiceLoader.loadServices(Logger.class);
             serviceImpl = (serviceImpls.size() > 0 ? serviceImpls.get(0) : null);            
         }
         

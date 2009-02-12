@@ -1,8 +1,10 @@
 package com.gnipcentral.client.resource;
 
-import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import javax.xml.bind.annotation.*;
 
 /**
  * A model object that represents a Gnip filter.  A Filter is a stream containing activities from a Publisher
@@ -23,24 +25,20 @@ import java.util.List;
  * <br/>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {"postUrl","rules"})
 @XmlRootElement(name = "filter")
 public class Filter implements Resource {
-
-    @XmlElement(required = true, name = "rule", type = Rule.class)
-    private List<Rule> rules;
 
     @XmlElement(name="postUrl")
     @XmlSchemaType(name = "anyURI")
     private String postUrl;
-
+    @XmlElement(required = true, name = "rule", type = Rule.class)
+    private List<Rule> rules;
     @XmlAttribute(required = true)
     private String name;
-
     @XmlAttribute(required=true)
     private boolean fullData = true;
 
-    @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressWarnings("unused")
     private Filter() {
         // empty constructor for jaxb
     }
@@ -79,14 +77,20 @@ public class Filter implements Resource {
 
     /**
      * Get the list of rules associated with this filter.  {@link Rule Rules} are subscriber-specified
-     * criteria used to activities from a Publisher to the Filter's activity stream. 
+     * criteria used to filter activities from a Publisher to the Filter's activity stream. 
      * @return the list of activities
      */
     public List<Rule> getRules() {
-        if (rules == null) {
-            rules = new ArrayList<Rule>();
-        }
-        return this.rules;
+        return rules;
+    }
+
+    /**
+     * Set the list of rules associated with this filter.  {@link Rule Rules} are subscriber-specified
+     * criteria used to filter activities from a Publisher to the Filter's activity stream. 
+     * @return the list of activities
+     */
+    public void setRules(List<Rule> rules) {
+        this.rules = rules;
     }
 
     /**
@@ -95,7 +99,25 @@ public class Filter implements Resource {
      * @return a reference to this object
      */
     public Filter addRule(Rule rule) {
-        getRules().add(rule);
+        if (rules == null) {
+            rules = new ArrayList<Rule>();
+        }
+        rules.add(rule);
+        return this;
+    }
+
+    /**
+     * Add a collection of {@link Rule} to the filter.
+     * @param rules the collection of rules to add
+     * @return a reference to this object
+     */
+    public Filter addRules(Collection<Rule> rules) {
+        if (rules != null) {
+            if (this.rules == null) {
+                this.rules = new ArrayList<Rule>(rules.size());
+            }
+            this.rules.addAll(rules);
+        }
         return this;
     }
 
@@ -105,7 +127,9 @@ public class Filter implements Resource {
      * @return a reference to this object
      */
     public Filter removeRule(Rule rule) {
-        getRules().remove(rule);
+        if (rules != null) {
+            rules.remove(rule);
+        }
         return this;        
     }
 
@@ -147,30 +171,39 @@ public class Filter implements Resource {
 
     /**
      * Sets the post URL for the Filter.  If set, the post URL is used by a Gnip server to send either
-     * full data activites or just activity notifications to the subscriber via an HTTP POST.
+     * full data activities or just activity notifications to the subscriber via an HTTP POST.
      * @param postUrl the post URL
      */
     public void setPostUrl(String postUrl) {
         this.postUrl = postUrl;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Filter that = (Filter) o;
+        Filter filter = (Filter) o;
 
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (fullData != that.fullData) return false;
-        if (postUrl != null ? !postUrl.equals(that.postUrl) : that.postUrl != null) return false;
+        if (postUrl != null ? !postUrl.equals(filter.postUrl) : filter.postUrl != null) return false;
+        if (rules != null ? !rules.equals(filter.rules) : filter.rules != null) return false;
+        if (name != null ? !name.equals(filter.name) : filter.name != null) return false;
+        if (fullData != filter.fullData) return false;
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
     public int hashCode() {
-        int result;
-        result = (rules != null ? rules.hashCode() : 0);
+        int result = (postUrl != null ? postUrl.hashCode() : 0);
+        result = 31 * result + (rules != null ? rules.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (postUrl != null ? postUrl.hashCode() : 0);
+        result = 31 * result + (fullData ? Boolean.TRUE.hashCode() : Boolean.FALSE.hashCode());
         return result;
     }
 }

@@ -16,14 +16,14 @@ import java.util.LinkedList;
  */
 class ServiceLoader {    
     
-    static List<Class> loadServices(Class service) {
+    static List<Class<?>> loadServices(Class<?> service) {
         if(service == null) {
             return Collections.emptyList();
         }
 
         String path = "META-INF/services/" + service.getName();
 
-        LinkedList<Class> classes = null;
+        LinkedList<Class<?>> classes = null;
         InputStream is = null;
         BufferedReader r = null;
         try {
@@ -42,9 +42,9 @@ class ServiceLoader {
                         line = line.substring(0, idx);
                     line = line.trim();
 
-                    Class c = Class.forName(line);
+                    Class<?> c = Class.forName(line);
                     if(classes == null) {
-                        classes = new LinkedList<Class>();
+                        classes = new LinkedList<Class<?>>();
                     }
 
                     classes.add(c);

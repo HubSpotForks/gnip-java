@@ -1,29 +1,28 @@
 package com.gnipcentral.client.resource;
 
-import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import javax.xml.bind.annotation.*;
 
 /**
  * Container class that wraps a set of {@link Activity} instances that will be sent to a Gnip server
  * or were read from a Gnip server.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {"activities"})
 @XmlRootElement(name = "activities")
 public class Activities implements Resource {
 
-    @XmlElement(name = "activity", required = false, type = Activity.class)
-    private ArrayList<Activity> activities;
-
-    @XmlAttribute(name="publisher",required=false)
+    @XmlElement(name = "activity", type = Activity.class)
+    private List<Activity> activities;
+    @XmlAttribute(name = "publisher")
     private String publisherName;
 
     /**
      * Default constructor.
      */
     public Activities() {
-        activities = new ArrayList<Activity>();
     }
 
     /**
@@ -31,18 +30,26 @@ public class Activities implements Resource {
      * @param activities
      */
     public Activities(Activity ... activities) {
-        this();
-        for(Activity activity : activities) {
-            add(activity);
+        this.activities = new ArrayList<Activity>();
+        for (Activity activity : activities) {
+            this.activities.add(activity);
         }
     }
 
     /**
      * Retrieves a list of activities.
-     * @return the list of activities or an empty list if no activities exist
+     * @return the list of activities
      */
     public List<Activity> getActivities() {
         return activities;
+    }
+
+    /**
+     * Set the list of activities.
+     * @param activities the list of activities
+     */
+    public void setActivities(List<Activity> activities) {
+        this.activities = activities;
     }
 
     /**
@@ -58,7 +65,7 @@ public class Activities implements Resource {
      * @return <code>true</code> if this contains activities; <code>false</code> otherwise
      */
     public boolean isEmpty() {
-        return activities.isEmpty();
+        return (activities == null || activities.isEmpty());
     }
 
     /**
@@ -67,6 +74,9 @@ public class Activities implements Resource {
      * @return a reference to this object
      */
     public Activities add(Activity activity) {
+        if (activities == null) {
+            activities = new ArrayList<Activity>();
+        }
         activities.add(activity);
         return this;
     }
@@ -77,17 +87,27 @@ public class Activities implements Resource {
      * @return a reference to this object
      */
     public Activities addAll(Activities activities) {
-        activities.addAll(activities.getActivities());
+        if (activities != null && activities.getActivities() != null) {
+            if (this.activities == null) {
+                this.activities = new ArrayList<Activity>(activities.getActivities().size());
+            }
+            this.activities.addAll(activities.getActivities());
+        }
         return this;
     }
 
     /**
      * Add all of the activities from a {@link List} of activities.
-     * @param activities the activities to add
+     * @param activities the collection of activities to add
      * @return a reference to this object
      */
-    public Activities addAll(List<Activity> activities) {
-        activities.addAll(activities);
+    public Activities addAll(Collection<Activity> activities) {
+        if (activities != null) {
+            if (this.activities == null) {
+                this.activities = new ArrayList<Activity>(activities.size());
+            }
+            this.activities.addAll(activities);
+        }
         return this;
     }
 }

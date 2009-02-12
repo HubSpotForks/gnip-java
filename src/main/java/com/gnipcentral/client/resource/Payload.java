@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
-import java.nio.charset.Charset;
-import javax.xml.bind.annotation.XmlInlineBinaryData;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.*;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -36,61 +35,162 @@ import org.apache.commons.codec.binary.Base64;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Payload {
 
-    @XmlElement(required = true)
+    @XmlElement
+    private String title;
+    @XmlElement
     @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
     private String body;
-
-    @XmlElement
+    @XmlElement(name = "mediaURL", type = MediaUrl.class)
+    private List<MediaUrl> mediaUrls;
+    @XmlElement(required = true)
     @XmlInlineBinaryData
     private String raw;
 
-    private String decodedRaw = null;
+    @XmlTransient
+    private String decodedRaw;
 
-    @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressWarnings("unused")
     private Payload() {
         // empty constructor for jaxb
     }
 
     /**
-     * Create a basic payload object.  Typically, this method would be called when creating an {@link Activity}
-     * to publish into Gnip.  The <code>raw</code> passed here should <i>not</i> be Base64 encoded; if already
-     * encoded, it will be re-encoded.  To pass an encoded <code>raw</code> use the {@link #Payload(String, String, boolean)}
-     * constructor. 
-     *
+     * Create a basic payload object with specified title, body, and raw data.  Typically, this method would
+     * be called when creating an {@link Activity} to publish into Gnip.  The <code>raw</code> passed here
+     * should <i>not</i> be Base64 encoded; if already encoded, it will be re-encoded. To pass an encoded
+     * <code>raw</code> use the {@link #Payload(String, String, String, boolean)} constructor. 
+     * @param title the optional value of the title.
      * @param body the body of the activity
      * @param raw an un-encoded representation of the activity payload
      */
-    public Payload(String body, String raw) {
-        this(body, raw, false);
+    public Payload(String title, String body, String raw) {
+        this(title, body, raw, false);
     }
 
     /**
-     * Create a payload object.  This constructor can be used to create a Payload with an already encoded raw or
-     * with an unencoded raw by setting the {@param isEncoded} flag correctly.
-     * 
-     * @param body the value of the body
-     * @param raw the value of the activity's raw data
+     * Create a payload object with specified title, body, and raw data.  This constructor can be used to
+     * create a Payload with an already encoded raw or with an unencoded raw by setting the {@param isEncoded}
+     * flag correctly.
+     * @param title the optional value of the title.
+     * @param body the optional value of the body
+     * @param raw the required value of the activity's raw data
      * @param isEncoded a flag set for whether the raw data is encoded
      */
-    public Payload(String body, String raw, boolean isEncoded) {
+    public Payload(String title, String body, String raw, boolean isEncoded) {
+        this(title, body, null, raw, isEncoded);
+    }
+
+    /**
+     * Create a payload object with all arguments.  This constructor can be used to create a Payload with
+     * an already encoded raw or with an unencoded raw by setting the {@param isEncoded} flag correctly.
+     * @param title the optional value of the title.
+     * @param body the optional value of the body.
+     * @param mediaUrls the optional media urls list.
+     * @param raw the required value of the activity's raw data.
+     * @param isEncoded flag indicating whether raw data is encoded.
+     */
+    public Payload(String title, String body, List<MediaUrl> mediaUrls, String raw, boolean isEncoded) {
+        if (raw == null) {
+            throw new IllegalArgumentException("Invalid raw payload specified '"+raw+"'");
+        }
+
+        this.title = title;
         this.body = body;
+        this.mediaUrls = mediaUrls;
         this.raw = isEncoded ? raw : encode(raw);
     }
 
     /**
-     * Retrieves the payload's body.
-     * @return the body string
+     * Retrieves this payload's title.
+     * @return the title string.
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Sets this payload's title.
+     * @param body the body title.
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * Retrieves this payload's body.
+     * @return the body string.
      */
     public String getBody() {
         return body;
     }
 
     /**
-     * Retrieves the payload's raw data.  This value will be Base64 encoded.
-     * @return the raw, encoded string
+     * Sets this payload's body.
+     * @param body the body string.
+     */
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    /**
+     * Retrieves this payload's list of media urls.
+     * @return the list of media urls.
+     */
+    public List<MediaUrl> getMediaUrls() {
+        return mediaUrls;
+    }
+
+    /**
+     * Set this payload's list of media urls.
+     * @param mediaUrls the list of media urls.
+     */
+    public void setMediaUrls(List<MediaUrl> mediaUrls) {
+        this.mediaUrls = mediaUrls;
+    }    
+    
+    /**
+     * Add media url to this payload's list of media urls.
+     * @param mediaUrl the media url to add.
+     * @return a reference to this object.
+     */
+    public Payload addMediaUrl(MediaUrl mediaUrl) {
+        if (mediaUrls == null) {
+            mediaUrls = new ArrayList<MediaUrl>();
+        }
+        mediaUrls.add(mediaUrl);
+        return this;
+    }    
+    
+    /**
+     * Add a collection of media urls to this payload's list of media urls.
+     * @param mediaUrls the list of media url to add.
+     * @return a reference to this object.
+     */
+    public Payload addMediaUrls(Collection<MediaUrl> mediaUrls) {
+        if (mediaUrls != null) {
+            if (this.mediaUrls == null) {
+                this.mediaUrls = new ArrayList<MediaUrl>(mediaUrls.size());
+            }
+            this.mediaUrls.addAll(mediaUrls);
+        }
+        return this;
+    }    
+    
+    /**
+     * Retrieves this Payload's raw data. This value will be Base64 encoded.
+     * @return the raw, encoded string.
      */
     public String getRaw() {
         return raw;
+    }
+
+    /**
+     * Set this Payload's raw data. This value will be Base64 encoded.
+     * @param raw the raw, encoded string.
+     */
+    public void setRaw(String raw) {
+        this.raw = raw;
+        decodedRaw = null;
     }
 
     /**

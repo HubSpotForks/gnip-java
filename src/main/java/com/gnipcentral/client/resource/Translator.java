@@ -23,7 +23,8 @@ public class Translator {
     static {
         try {
             context = JAXBContext.newInstance(Activities.class, Activity.class, Error.class, Publishers.class,
-                                              Publisher.class, Filter.class, Rule.class, Rules.class, Payload.class);
+                                              Publisher.class, Filter.class, Rule.class, Rules.class, Payload.class,
+                                              Result.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -97,6 +98,16 @@ public class Translator {
      */
     public static Resource parseResource(InputStream input) throws JAXBException {
         return (Resource) getUnmarshaller().unmarshal(input);
+    }
+
+    /**
+     * Parse a {@link Result} from a {@link InputStream}.
+     * @param input the XML input
+     * @return the model object
+     * @throws JAXBException if an error occurs unmarshalling the object from XML
+     */
+    public static Result parseResult(InputStream input) throws JAXBException {
+        return (Result) getUnmarshaller().unmarshal(input);
     }
 
     /**

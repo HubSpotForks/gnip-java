@@ -1,14 +1,11 @@
 package com.gnipcentral.client.resource;
 
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.*;
 
 /**
  * Enumeration of the rule types that are supported by Gnip {@link Filter}s.
  */
 @XmlEnum
-@XmlType(name = "concernType")
 public enum RuleType {
 
     /**
@@ -41,6 +38,7 @@ public enum RuleType {
     @XmlEnumValue("to")
     TO("to");
 
+    @XmlTransient
     private final String value;
 
     private RuleType(String v) {
@@ -55,6 +53,10 @@ public enum RuleType {
         return value;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Enum#toString()
+     */
+    @Override
     public String toString() {
         return value();
     }

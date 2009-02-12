@@ -85,6 +85,7 @@ public abstract class Logger {
                 return;
             }
 
+            System.out.print("[" + System.currentTimeMillis() + "] ");
             System.out.printf(object.toString(), args);
         }
     }

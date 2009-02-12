@@ -3,12 +3,10 @@ package com.gnipcentral.client;
 import com.gnipcentral.client.resource.*;
 import com.gnipcentral.client.util.Logger;
 import com.gnipcentral.client.util.LoggerFactory;
-import org.joda.time.DateTime;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.*;
 import java.net.URL;
-import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 public class GnipTestCase extends BaseTestCase {
@@ -22,6 +20,7 @@ public class GnipTestCase extends BaseTestCase {
     }
 
     protected Config config;
+    protected long serverTimeCorrection;
     protected GnipConnection gnipConnection;
     protected Filter filterToCreate;
     protected Filter notificationFilterToCreate;
@@ -39,20 +38,26 @@ public class GnipTestCase extends BaseTestCase {
         config = new Config(CONFIG.getUsername(), CONFIG.getPassword(), new URL(CONFIG.getHost()));
         config.setReadTimeout(10000);
         gnipConnection = new GnipConnection(config);
+        
+        serverTimeCorrection = gnipConnection.getServerTimeDelta();
+        if (serverTimeCorrection == 0L) {
+            LOG.log("Note: connection server time delta may not be available\n");            
+        }
+        gnipConnection.setTimeCorrection(serverTimeCorrection);
 
         String localPublisherId = CONFIG.getPublisher();
-        localPublisher = gnipConnection.getPublisher(localPublisherId);
+        localPublisher = gnipConnection.getPublisher(PublisherType.MY, localPublisherId);
         if(localPublisher == null) {
             throw new AssertionError("No Publisher found with name " + localPublisherId + ".  Be sure " +
                 "to provide the name of a publisher you own in the test.properties file.");
         }
 
         activities = new Activities();
-        activity1 = new Activity("joe", "update1");
+        activity1 = new Activity(new Actor("joe"), "update1");
         activities.add(activity1);
-        activity2 = new Activity("tom", "update2");
+        activity2 = new Activity(new Actor("tom"), "update2");
         activities.add(activity2);
-        activity3 = new Activity("jane", "update3");
+        activity3 = new Activity(new Actor("jane"), "update3");
         activities.add(activity3);
 
         filterToCreate = new Filter("tomFilter");
@@ -62,15 +67,17 @@ public class GnipTestCase extends BaseTestCase {
         notificationFilterToCreate.setFullData(false);
         notificationFilterToCreate.addRule(new Rule(RuleType.ACTOR, "jane"));
 
-        Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is createdn
-                                               // before starting to run the tests
+        // sleep to ensure that the filter is created
+        // before starting to run the tests
+        Thread.sleep(CONFIG.getIdleMillis());
 
         LOG.log("Test setUp() end\n");
     }
 
     protected void tearDown() throws Exception {
         LOG.log("Test tearDown() start\n");
-        Thread.sleep(CONFIG.getIdleSeconds()); // sleep to ensure that the filter is created before starting to run the tests
+        // sleep between tests
+        Thread.sleep(CONFIG.getIdleMillis());
         LOG.log("Test tearDown() end\n");        
         super.tearDown();
     }
@@ -81,7 +88,25 @@ public class GnipTestCase extends BaseTestCase {
     }
     
     protected void waitForServerWorkToComplete() throws Exception {
-        Thread.sleep(CONFIG.getIdleSeconds());
+        LOG.log("Waiting for server work to complete: %dms...\n", CONFIG.getIdleMillis());
+        Thread.sleep(CONFIG.getIdleMillis());
+        LOG.log("Continuing...\n");
+    }
+
+    protected void waitForPublishTimeBucketStart() throws Exception {
+        // wait for publish time bucket to start to ensure
+        // getting activities and notifications in the current
+        // time bucket will succeed assuming interval between
+        // publish and access is approximately the idle millis
+        // or less.
+        long currentServerTime = System.currentTimeMillis() + serverTimeCorrection;
+        long timeRemainingInCurrentBucket = GnipConnection.BUCKET_SIZE_MILLIS - (currentServerTime % GnipConnection.BUCKET_SIZE_MILLIS);
+        if (timeRemainingInCurrentBucket < CONFIG.getIdleMillis()*2) {
+            long timeToWaitForNextBucketStart = timeRemainingInCurrentBucket+CONFIG.getIdleMillis();
+            LOG.log("Waiting for server time bucket start: %dms...\n", timeToWaitForNextBucketStart);
+            Thread.sleep(timeToWaitForNextBucketStart);
+            LOG.log("Continuing...\n");
+        }
     }
 
     protected String encodePayload(String string) throws Exception {
