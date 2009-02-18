@@ -18,6 +18,10 @@ public class GnipTestCase extends BaseTestCase {
         CONFIG = TestConfig.getInstance(); 
         LOG = LoggerFactory.getInstance();
     }
+    
+    protected boolean setupLocalPublisher = true;
+    protected boolean setupActivities = true;
+    protected boolean setupFilters = true;
 
     protected Config config;
     protected long serverTimeCorrection;
@@ -45,31 +49,37 @@ public class GnipTestCase extends BaseTestCase {
         }
         gnipConnection.setTimeCorrection(serverTimeCorrection);
 
-        String localPublisherId = CONFIG.getPublisher();
-        localPublisher = gnipConnection.getPublisher(PublisherType.MY, localPublisherId);
-        if(localPublisher == null) {
-            throw new AssertionError("No Publisher found with name " + localPublisherId + ".  Be sure " +
-                "to provide the name of a publisher you own in the test.properties file.");
+        if (setupLocalPublisher) {
+            String localPublisherId = CONFIG.getPublisher();
+            localPublisher = gnipConnection.getPublisher(PublisherType.MY, localPublisherId);
+            if(localPublisher == null) {
+                throw new AssertionError("No Publisher found with name " + localPublisherId + ".  Be sure " +
+                    "to provide the name of a publisher you own in the test.properties file.");
+            }
         }
 
-        activities = new Activities();
-        activity1 = new Activity(new Actor("joe"), "update1");
-        activities.add(activity1);
-        activity2 = new Activity(new Actor("tom"), "update2");
-        activities.add(activity2);
-        activity3 = new Activity(new Actor("jane"), "update3");
-        activities.add(activity3);
+        if (setupActivities) {
+            activities = new Activities();
+            activity1 = new Activity(new Actor("joe"), "update1");
+            activities.add(activity1);
+            activity2 = new Activity(new Actor("tom"), "update2");
+            activities.add(activity2);
+            activity3 = new Activity(new Actor("jane"), "update3");
+            activities.add(activity3);
+        }
 
-        filterToCreate = new Filter("tomFilter");
-        filterToCreate.addRule(new Rule(RuleType.ACTOR, "tom"));
+        if (setupFilters) {
+            filterToCreate = new Filter("tomFilter");
+            filterToCreate.addRule(new Rule(RuleType.ACTOR, "tom"));
 
-        notificationFilterToCreate = new Filter("janeFilter");
-        notificationFilterToCreate.setFullData(false);
-        notificationFilterToCreate.addRule(new Rule(RuleType.ACTOR, "jane"));
+            notificationFilterToCreate = new Filter("janeFilter");
+            notificationFilterToCreate.setFullData(false);
+            notificationFilterToCreate.addRule(new Rule(RuleType.ACTOR, "jane"));
 
-        // sleep to ensure that the filter is created
-        // before starting to run the tests
-        Thread.sleep(CONFIG.getIdleMillis());
+            // sleep to ensure that the filter is created
+            // before starting to run the tests
+            Thread.sleep(CONFIG.getIdleMillis());
+        }
 
         LOG.log("Test setUp() end\n");
     }

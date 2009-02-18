@@ -380,6 +380,44 @@ public class GnipConnection {
     }
 
     /**
+     * Delete an existing {@link Publisher}.
+     * @param publisher to delete.
+     * @return result message object from Gnip server.
+     * @throws GnipException if the Publisher does not exist, if there were problems authenticating with a Gnip
+     *                       server, or if another error occurred.  
+     */
+    public Result delete(Publisher publisher) throws GnipException {
+        return delete(publisher.getType(), publisher.getName());
+    }
+
+    /**
+     * Delete an existing {@link Publisher} by publisher type and publisher name.
+     * @param publisherType the publisher type scope of publisher to delete.
+     * @param publisherName name of the publisher to delete.
+     * @return result message object from Gnip server.
+     * @throws GnipException if the Publisher does not exist, if there were problems authenticating with a Gnip
+     *                       server, or if another error occurred.  
+     */
+    public Result delete(PublisherType publisherType, String publisherName) throws GnipException {
+        try {
+            InputStream response;
+            if(config.isTunnelOverPost()) {
+                response = connection.doPost(tunnelDeleteOverPost(getPublisherUrl(publisherType, publisherName)), new byte[0]);
+            }
+            else {
+                response = connection.doDelete(getPublisherUrl(publisherType, publisherName));
+            }
+            return Translator.parseResult(response);
+        }
+        catch(IOException e) {
+            throw new GnipException("Exception occurred deleting Publisher", e);
+        }
+        catch(JAXBException e) {
+            throw new GnipException("Exception occurred deleting Publisher", e);
+        }
+    }
+
+    /**
      * Delete the filter {@link Filter} from the {@link Publisher}.
      * @param publisher the publisher from which to delete the filter
      * @param filter the filter to delete
