@@ -6,7 +6,7 @@ import java.util.HashSet;
 import javax.xml.bind.annotation.*;
 
 /**
- * A model object that references a Gnip publisher.  All publishers are scoped by publisher type.  A Gnip
+ * A model object that references a Gnip publisher.  All publishers are scoped by publisher scope.  A Gnip
  * Publisher receives incoming {@link Activity} data and passes that data along in two forms:
  * <ol>
  * <li>as a stream of activity notifications</li>
@@ -30,7 +30,7 @@ public class Publisher implements Resource {
     private Set<RuleType> ruleTypes;
     
     @XmlTransient
-    private PublisherType type;
+    private PublisherScope scope;
     
     @SuppressWarnings("unused")
     private Publisher() {
@@ -39,44 +39,46 @@ public class Publisher implements Resource {
 
     /**
      * Basic constructor.
-     * @param type the required type of the publisher
+     * @param scope the required scope of the publisher
      * @param name the required name of the publisher
      */
-    public Publisher(PublisherType type, String name) {
-        if (type == null) {
-            throw new IllegalArgumentException("Invalid type specified '"+type+"'");
+    public Publisher(PublisherScope scope, String name) {
+        if (scope == null) {
+            throw new IllegalArgumentException("Invalid scope specified '"+scope+"'");
         }
         if (name == null) {
             throw new IllegalArgumentException("Invalid name specified '"+name+"'");
         }
 
-        this.type = type;
+        this.scope = scope;
         this.name = name;
     }
 
     /**
-     * Create a Publisher model object with the given {@param name} and {@param ruleTypes}.  Note, calling
-     * this constructor does <b>not</b> create the publisher on a Gnip server.
+     * Create a Publisher model object with the given {@param scope}, {@param name}, and
+     * {@param ruleTypes}.  Note, calling this constructor does <b>not</b> create the
+     * publisher on a Gnip server.
      *
-     * @param type the required type of the publisher
+     * @param scope the required scope of the publisher
      * @param name the required publisher's name
      * @param ruleTypes the publisher's rule types
      */
-    public Publisher(PublisherType type, String name, Set<RuleType> ruleTypes) {
-        this(type, name);
+    public Publisher(PublisherScope scope, String name, Set<RuleType> ruleTypes) {
+        this(scope, name);
         this.ruleTypes = ruleTypes;
     }
 
     /**
-     * Create a Publisher model object with the given {@param name} and {@param ruleTypes}.  Note, calling
-     * this constructor does <b>not</b> create the publisher on a Gnip server.
+     * Create a Publisher model object with the given {@param scope}, {@param name}, and
+     * {@param ruleTypes}.  Note, calling this constructor does <b>not</b> create the
+     * publisher on a Gnip server.
      *
-     * @param type the required type of the publisher
+     * @param scope the required scope of the publisher
      * @param name the required publisher's name
      * @param ruleTypes the publisher's rule types
      */
-    public Publisher(PublisherType type, String name, RuleType ... ruleTypes) {
-        this(type, name);
+    public Publisher(PublisherScope scope, String name, RuleType ... ruleTypes) {
+        this(scope, name);
         this.ruleTypes = new HashSet<RuleType>(ruleTypes.length);
         for(RuleType ruleType : ruleTypes) {
             this.ruleTypes.add(ruleType);
@@ -100,19 +102,19 @@ public class Publisher implements Resource {
     }
 
     /**
-     * Retrieves the type of this publisher.
-     * @return the type of the publisher
+     * Retrieves the scope of this publisher.
+     * @return the scope of the publisher
      */
-    public PublisherType getType() {
-        return type;
+    public PublisherScope getScope() {
+        return scope;
     }
 
     /**
-     * Set the type of this publisher.
-     * @param the type of the publisher
+     * Set the scope of this publisher.
+     * @param the scope of the publisher
      */
-    public void setType(PublisherType type) {
-        this.type = type;
+    public void setScope(PublisherScope scope) {
+        this.scope = scope;
     }
 
     /**
@@ -184,7 +186,7 @@ public class Publisher implements Resource {
 
         if (name != null ? !name.equals(publisher.name) : publisher.name != null) return false;
         if (ruleTypes != null ? !ruleTypes.equals(publisher.ruleTypes) : publisher.ruleTypes != null) return false;
-        if (type != null ? !type.equals(publisher.type) : publisher.type != null) return false;
+        if (scope != null ? !scope.equals(publisher.scope) : publisher.scope != null) return false;
 
         return true;
     }
@@ -196,7 +198,7 @@ public class Publisher implements Resource {
     public int hashCode() {
         int result = (name != null ? name.hashCode() : 0);
         result = 31 * result + (ruleTypes != null ? ruleTypes.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (scope != null ? scope.hashCode() : 0);
         return result;
     }
 }

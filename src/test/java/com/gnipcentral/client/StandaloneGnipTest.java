@@ -2,7 +2,7 @@ package com.gnipcentral.client;
 
 import java.net.URL;
 
-import com.gnipcentral.client.resource.PublisherType;
+import com.gnipcentral.client.resource.PublisherScope;
 
 /**
   A simple, standalone class with a <code>main</code> method that can be used to
@@ -20,6 +20,6 @@ public class StandaloneGnipTest {
         TestConfig testConfig = TestConfig.getInstance();
         Config config = new Config(testConfig.getUsername(), testConfig.getPassword(), new URL(testConfig.getHost()));
         GnipConnection gnip = new GnipConnection(config);
-        gnip.getPublisher(PublisherType.MY, testConfig.getPublisher());
+        gnip.getPublisher(PublisherScope.MY, testConfig.getPublisher());
     }
 }

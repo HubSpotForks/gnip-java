@@ -14,7 +14,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
         
         // ensure transient publishers are deleted
         try {
-            gnipConnection.delete(PublisherType.MY, "test-create-delete-publisher");
+            gnipConnection.delete(PublisherScope.MY, "test-create-delete-publisher");
             waitForServerWorkToComplete();
         } catch (GnipException e) {
         }
@@ -23,7 +23,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
     protected void tearDown() throws Exception {
         // ensure transient publishers are deleted
         try {
-            gnipConnection.delete(PublisherType.MY, "test-create-delete-publisher");
+            gnipConnection.delete(PublisherScope.MY, "test-create-delete-publisher");
         } catch (GnipException e) {
         }
 
@@ -34,13 +34,13 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
     public void testCreateDeletePublisher() throws Exception {
         // test non-existing publisher exception
         try {
-            gnipConnection.getPublisher(PublisherType.MY, "test-create-delete-publisher");
+            gnipConnection.getPublisher(PublisherScope.MY, "test-create-delete-publisher");
             fail("Unexpected successful access to publisher that should not exist");
         } catch (GnipException e) {
         }
         
         // dynamically create new publisher
-        Publisher newPublisher = new Publisher(PublisherType.MY, "test-create-delete-publisher");
+        Publisher newPublisher = new Publisher(PublisherScope.MY, "test-create-delete-publisher");
         newPublisher.addSupportedRuleType(RuleType.ACTOR);
         newPublisher.addSupportedRuleType(RuleType.REGARDING);
         newPublisher.addSupportedRuleType(RuleType.SOURCE);
@@ -56,7 +56,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
 
         // test existing publisher
         try {
-            newPublisher = gnipConnection.getPublisher(PublisherType.MY, "test-create-delete-publisher");
+            newPublisher = gnipConnection.getPublisher(PublisherScope.MY, "test-create-delete-publisher");
             assertNotNull(newPublisher);
         } catch (GnipException e) {
             LOG.log("Unexpected getPublisher() test exception: %s\n", e.toString());
@@ -74,7 +74,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
 
         // test non-existing publisher exception
         try {
-            gnipConnection.getPublisher(PublisherType.MY, "test-create-delete-publisher");
+            gnipConnection.getPublisher(PublisherScope.MY, "test-create-delete-publisher");
             fail("Unexpected successful access to publisher that should have been deleted");
         } catch (GnipException e) {
         }

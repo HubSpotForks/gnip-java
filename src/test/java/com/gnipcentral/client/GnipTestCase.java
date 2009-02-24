@@ -51,7 +51,7 @@ public class GnipTestCase extends BaseTestCase {
 
         if (setupLocalPublisher) {
             String localPublisherId = CONFIG.getPublisher();
-            localPublisher = gnipConnection.getPublisher(PublisherType.MY, localPublisherId);
+            localPublisher = gnipConnection.getPublisher(PublisherScope.MY, localPublisherId);
             if(localPublisher == null) {
                 throw new AssertionError("No Publisher found with name " + localPublisherId + ".  Be sure " +
                     "to provide the name of a publisher you own in the test.properties file.");

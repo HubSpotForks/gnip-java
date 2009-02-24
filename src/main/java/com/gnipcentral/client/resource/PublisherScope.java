@@ -1,11 +1,9 @@
 package com.gnipcentral.client.resource;
 
-import com.gnipcentral.client.GnipConnection;
-
 /**
- * Enumeration of the publisher types that are supported by Gnip {@link GnipConnection} APIs.
+ * Enumeration of the publisher scopes that are supported by Gnip {@link GnipConnection} APIs.
  */
-public enum PublisherType
+public enum PublisherScope
 {
     /**
      * <i>My</i> publishers.
@@ -25,12 +23,12 @@ public enum PublisherType
 
     private final String requestScope;
 
-    private PublisherType(String requestScope) {
+    private PublisherScope(String requestScope) {
         this.requestScope = requestScope;
     }
 
     /**
-     * Retrieves the request scope associated with this {@link PublisherType}.
+     * Retrieves the request scope associated with this {@link PublisherScope}.
      * @return request scope
      */
     public String requestScope() {

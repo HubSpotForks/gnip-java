@@ -143,7 +143,7 @@ public class GnipConnection {
     public Result create(Publisher publisher) throws GnipException {
         try {
             byte[] data = convertToBytes(publisher);
-            InputStream response = connection.doPost(getPublishersUrl(publisher.getType()), data);
+            InputStream response = connection.doPost(getPublishersUrl(publisher.getScope()), data);
             return Translator.parseResult(response);
         }
         catch(IOException e) {
@@ -166,7 +166,7 @@ public class GnipConnection {
     public Result create(Publisher publisher, Filter filter) throws GnipException {
         try {
             byte[] data = convertToBytes(filter);
-            InputStream response = connection.doPost(getFilterCreateUrl(publisher.getType(), publisher.getName()), data);
+            InputStream response = connection.doPost(getFilterCreateUrl(publisher.getScope(), publisher.getName()), data);
             return Translator.parseResult(response);
         }
         catch(IOException e) {
@@ -180,17 +180,17 @@ public class GnipConnection {
 
     /**
      * Retrieves the list of Publishers available from Gnip. All publishers are scoped
-     * by publisher type.
-     * @param publisherType the publisher type scope of publishers to retrieve.
+     * by publisher scope.
+     * @param publisherScope the publisher scope of publishers to retrieve.
      * @return the list of {@link Publishers}
      * @throws GnipException if there were problems authenticating with the Gnip server or if another error occurred.
      */
-    public Publishers getPublishers(PublisherType publisherType) throws GnipException {
+    public Publishers getPublishers(PublisherScope publisherScope) throws GnipException {
         try {
-            InputStream response = connection.doGet(getPublishersUrl(publisherType) + ".xml");
+            InputStream response = connection.doGet(getPublishersUrl(publisherScope) + ".xml");
             Publishers publishers = Translator.parsePublishers(new InputSource(response));
             for (Publisher publisher : publishers.getPublishers()) {
-                publisher.setType(publisherType);
+                publisher.setScope(publisherScope);
             }
             return publishers;
         }
@@ -204,18 +204,18 @@ public class GnipConnection {
 
     /**
      * Retrieves a Publisher named <code>publisherName</code>. All publishers are scoped
-     * by publisher type.
-     * @param publisherType the publisher type scope of publisher to retrieve.
+     * by publisher scope.
+     * @param publisherScope the publisher scope of publisher to retrieve.
      * @param publisherName name of the publisher to get
      * @return the {@link Publisher} if it exists
      * @throws GnipException if the publisher doesn't exist, if there were problems authenticating with the Gnip server,
      *                       or if another error occurred.                       
      */
-    public Publisher getPublisher(PublisherType publisherType, String publisherName) throws GnipException {
+    public Publisher getPublisher(PublisherScope publisherScope, String publisherName) throws GnipException {
         try {
-            InputStream response = connection.doGet(getPublishersUrl(publisherType, publisherName));
+            InputStream response = connection.doGet(getPublishersUrl(publisherScope, publisherName));
             Publisher publisher = Translator.parsePublisher(new InputSource(response));
-            publisher.setType(publisherType);
+            publisher.setScope(publisherScope);
             return publisher;
         }
         catch(IOException e) {
@@ -266,25 +266,25 @@ public class GnipConnection {
             throw new IllegalArgumentException("Filter name cannot be null");
         }
 
-        return getFilter(publisher.getType(), publisher.getName(), filterName);
+        return getFilter(publisher.getScope(), publisher.getName(), filterName);
     }
 
     /**
      * Retrieves the Filter named {@param filterName} from the {@link Publisher} named {@param publisherName}.
-     * @param publisherType the publisher type scope of publisher.
+     * @param publisherScope the publisher scope of publisher.
      * @param publisherName the name of the publisher
      * @param filterName the filter to retrieve
      * @return the {@link Filter} if it exists
      * @throws GnipException if the {@link Filter} doesn't exist, if there were problems authenticating with the Gnip server,
      *                       or if another error occurred.
      */
-    public Filter getFilter(PublisherType publisherType, String publisherName, String filterName) throws GnipException {
+    public Filter getFilter(PublisherScope publisherScope, String publisherName, String filterName) throws GnipException {
         if(filterName == null) {
             throw new IllegalArgumentException("Filter name cannot be null");
         }
 
         try {
-            InputStream response = connection.doGet(getFilterUrl(publisherType, publisherName, filterName));
+            InputStream response = connection.doGet(getFilterUrl(publisherScope, publisherName, filterName));
             return Translator.parseFilter(new InputSource(response));
         }
         catch(IOException e) {
@@ -387,25 +387,25 @@ public class GnipConnection {
      *                       server, or if another error occurred.  
      */
     public Result delete(Publisher publisher) throws GnipException {
-        return delete(publisher.getType(), publisher.getName());
+        return delete(publisher.getScope(), publisher.getName());
     }
 
     /**
-     * Delete an existing {@link Publisher} by publisher type and publisher name.
-     * @param publisherType the publisher type scope of publisher to delete.
+     * Delete an existing {@link Publisher} by publisher scope and publisher name.
+     * @param publisherScope the publisher scope of publisher to delete.
      * @param publisherName name of the publisher to delete.
      * @return result message object from Gnip server.
      * @throws GnipException if the Publisher does not exist, if there were problems authenticating with a Gnip
      *                       server, or if another error occurred.  
      */
-    public Result delete(PublisherType publisherType, String publisherName) throws GnipException {
+    public Result delete(PublisherScope publisherScope, String publisherName) throws GnipException {
         try {
             InputStream response;
             if(config.isTunnelOverPost()) {
-                response = connection.doPost(tunnelDeleteOverPost(getPublisherUrl(publisherType, publisherName)), new byte[0]);
+                response = connection.doPost(tunnelDeleteOverPost(getPublisherUrl(publisherScope, publisherName)), new byte[0]);
             }
             else {
-                response = connection.doDelete(getPublisherUrl(publisherType, publisherName));
+                response = connection.doDelete(getPublisherUrl(publisherScope, publisherName));
             }
             return Translator.parseResult(response);
         }
@@ -739,36 +739,36 @@ public class GnipConnection {
         return bytes; 
     }
 
-    private String getPublishersUrl(PublisherType publisherType) {
-        return config.getGnipServer() + "/" + publisherType.requestScope() + "/publishers";
+    private String getPublishersUrl(PublisherScope publisherScope) {
+        return config.getGnipServer() + "/" + publisherScope.requestScope() + "/publishers";
     }
 
-    private String getPublishersUrl(PublisherType publisherType, String publisherName) {
-        return getPublishersUrl(publisherType) + "/" + publisherName + ".xml";
+    private String getPublishersUrl(PublisherScope publisherScope, String publisherName) {
+        return getPublishersUrl(publisherScope) + "/" + publisherName + ".xml";
     }
 
-    private String getPublisherUrl(PublisherType publisherType, String publisherName) {
-        return getPublishersUrl(publisherType) + "/" + publisherName;
+    private String getPublisherUrl(PublisherScope publisherScope, String publisherName) {
+        return getPublishersUrl(publisherScope) + "/" + publisherName;
     }
 
-    private String getFilterCreateUrl(PublisherType publisherType, String publisherName) {
-        return getPublishersUrl(publisherType) + "/" + publisherName + "/filters";
+    private String getFilterCreateUrl(PublisherScope publisherScope, String publisherName) {
+        return getPublishersUrl(publisherScope) + "/" + publisherName + "/filters";
     }
 
-    private String getFilterUrl(PublisherType publisherType, String publisherName, String filterName) {
-        return getPublishersUrl(publisherType) + "/" + publisherName + "/filters/" + filterName + ".xml";
+    private String getFilterUrl(PublisherScope publisherScope, String publisherName, String filterName) {
+        return getPublishersUrl(publisherScope) + "/" + publisherName + "/filters/" + filterName + ".xml";
     }
 
     private String getFilterUrl(Publisher publisher, String filterName) {
-        return getFilterUrl(publisher.getType(), publisher.getName(), filterName);
+        return getFilterUrl(publisher.getScope(), publisher.getName(), filterName);
     }
 
-    private String getRulesUrl(PublisherType publisherType, String publisherName, String filterName) {
-        return getPublishersUrl(publisherType) + "/" + publisherName + "/filters/" + filterName + "/rules";
+    private String getRulesUrl(PublisherScope publisherScope, String publisherName, String filterName) {
+        return getPublishersUrl(publisherScope) + "/" + publisherName + "/filters/" + filterName + "/rules";
     }
 
     private String getRulesUrl(Publisher publisher, String filterName) {
-        return getRulesUrl(publisher.getType(), publisher.getName(), filterName);
+        return getRulesUrl(publisher.getScope(), publisher.getName(), filterName);
     }
 
     private String getRulesDeleteUrl(Publisher publisher, Filter filter, Rule rule) throws UnsupportedEncodingException {
@@ -780,19 +780,19 @@ public class GnipConnection {
     }
 
     private String getActivitiesPublishUrl(Publisher publisher) {
-        return getPublisherUrl(publisher.getType(), publisher.getName()) + "/activity";
+        return getPublisherUrl(publisher.getScope(), publisher.getName()) + "/activity";
     }
 
     private String getActivityUrl(Publisher publisher, boolean isNotification, DateTime date) {
         String bucket = date == null ? "current" : getDateString(date);
         String endpoint = isNotification ? "notification" : "activity";
-        return getPublisherUrl(publisher.getType(), publisher.getName()) + "/" + endpoint + "/" + bucket + ".xml";
+        return getPublisherUrl(publisher.getScope(), publisher.getName()) + "/" + endpoint + "/" + bucket + ".xml";
     }
 
     private String getActivityUrl(Publisher publisher, Filter filter, DateTime date) {
         String bucket = date == null ? "current" : getDateString(date);
         String endpoint = filter.isFullData() ? "activity" : "notification";
-        return getFilterCreateUrl(publisher.getType(), publisher.getName()) + "/" + filter.getName() + "/" + endpoint + "/" + bucket + ".xml";
+        return getFilterCreateUrl(publisher.getScope(), publisher.getName()) + "/" + filter.getName() + "/" + endpoint + "/" + bucket + ".xml";
     }
 
     private String tunnelEditOverPost(String url) {
