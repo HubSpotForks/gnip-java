@@ -27,7 +27,7 @@ connect to Gnip.  This file should be of the format:
 
 gnip.username=darthvader@deathstar.mil
 gnip.password=goempire
-gnip.host=https://prod.gnipcentral.com
+gnip.host=https://demo-v21.gnip.com
 gnip.publisher=mypublisher
 # the number of seconds to wait between each test's setup / teardown
 gnip.idlesecs=2 

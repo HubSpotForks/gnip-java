@@ -16,7 +16,7 @@ import java.net.URL;
  */
 public class Config {
 
-    public static final String DEFAULT_SERVER_URL = "https://prod.gnipcentral.com";
+    public static final String DEFAULT_SERVER_URL = "https://demo-v21.gnip.com";
     public static final int DEFAULT_READ_TIMEOUT_SECONDS = 2;
 
     private boolean useGzip = false;
