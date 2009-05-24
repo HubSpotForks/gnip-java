@@ -101,7 +101,7 @@
                 <xs:element name="at" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
                 <xs:element name="action" type="xs:string" minOccurs="1" maxOccurs="1"/>
                 <xs:element name="activityID" type="xs:string" minOccurs="0" maxOccurs="1"/>
-                <xs:element name="URL" type="xs:anyURI" minOccurs="0" maxOccurs="1"/>
+                <xs:element name="URL" type="xs:string" minOccurs="0" maxOccurs="1"/>
                 <xs:element name="source" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="keyword" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="place" minOccurs="0" maxOccurs="unbounded">
@@ -120,7 +120,7 @@
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
-                                <xs:attribute name="metaURL" use="optional" type="xs:anyURI"/>
+                                <xs:attribute name="metaURL" use="optional" type="xs:string"/>
                                 <xs:attribute name="uid" use="optional" type="xs:string"/>
                             </xs:extension>
                         </xs:simpleContent>
@@ -129,8 +129,8 @@
                 <xs:element name="destinationURL" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:simpleContent>
-                            <xs:extension base="xs:anyURI">
-                                <xs:attribute name="metaURL" use="optional" type="xs:anyURI"/>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="metaURL" use="optional" type="xs:string"/>
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
@@ -139,7 +139,7 @@
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
-                                <xs:attribute name="metaURL" use="optional" type="xs:anyURI"/>
+                                <xs:attribute name="metaURL" use="optional" type="xs:string"/>
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
@@ -148,7 +148,7 @@
                     <xs:complexType>
                         <xs:simpleContent>
                             <xs:extension base="xs:string">
-                                <xs:attribute name="metaURL" use="optional" type="xs:anyURI"/>
+                                <xs:attribute name="metaURL" use="optional" type="xs:string"/>
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
@@ -156,8 +156,8 @@
                 <xs:element name="regardingURL" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:simpleContent>
-                            <xs:extension base="xs:anyURI">
-                                <xs:attribute name="metaURL" use="optional" type="xs:anyURI"/>
+                            <xs:extension base="xs:string">
+                                <xs:attribute name="metaURL" use="optional" type="xs:string"/>
                             </xs:extension>
                         </xs:simpleContent>
                     </xs:complexType>
@@ -170,7 +170,7 @@
                             <xs:element name="mediaURL" minOccurs="0" maxOccurs="unbounded">
                                 <xs:complexType>
                                     <xs:simpleContent>
-                                        <xs:extension base="xs:anyURI">
+                                        <xs:extension base="xs:string">
                                             <xs:attribute name="height" use="optional" type="xs:string"/>
                                             <xs:attribute name="width" use="optional" type="xs:string"/>
                                             <xs:attribute name="duration" use="optional" type="xs:string"/>
@@ -226,6 +226,7 @@
             <xs:enumeration value="to"/>
             <xs:enumeration value="regarding"/>
             <xs:enumeration value="source"/>
+            <xs:enumeration value="keyword"/>
         </xs:restriction>
     </xs:simpleType>
 
