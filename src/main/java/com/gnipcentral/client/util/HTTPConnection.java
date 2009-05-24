@@ -168,8 +168,11 @@ public class HTTPConnection {
             String responseMessage = urlConnection.getResponseMessage();
             String errorMessage = "";
             try {
-                Error error = Translator.parseError(urlConnection.getErrorStream());
-                errorMessage = error.getMessage();
+                InputStream errorStream = urlConnection.getErrorStream();
+                if (errorStream != null) {
+                    Error error = Translator.parseError(urlConnection.getErrorStream());
+                    errorMessage = error.getMessage();
+                }
             }
             catch(JAXBException e) {
                 LOG.log("Exception occurred unmarshalling error message %s\n", e.toString());

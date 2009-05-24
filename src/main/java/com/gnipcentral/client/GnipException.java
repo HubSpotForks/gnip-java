@@ -25,4 +25,11 @@ public class GnipException extends Exception {
     public GnipException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public String toString() {
+        if (getCause() != null) {
+            return super.toString()+", ("+getCause().toString()+")";
+        }
+        return super.toString();
+    }
 }
