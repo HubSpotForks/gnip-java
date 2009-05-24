@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement(name = "filter")
 public class Filter implements Resource {
 
-    @XmlElement(name="postUrl")
+    @XmlElement(name="postURL")
     @XmlSchemaType(name = "anyURI")
     private String postUrl;
     @XmlElement(required = true, name = "rule", type = Rule.class)
