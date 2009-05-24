@@ -46,6 +46,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
         newPublisher.addSupportedRuleType(RuleType.SOURCE);
         newPublisher.addSupportedRuleType(RuleType.TAG);
         newPublisher.addSupportedRuleType(RuleType.TO);
+        newPublisher.addSupportedRuleType(RuleType.KEYWORD);
         try {
             gnipConnection.create(newPublisher);
             waitForServerWorkToComplete();

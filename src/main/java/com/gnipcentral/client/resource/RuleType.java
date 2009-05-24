@@ -36,7 +36,13 @@ public enum RuleType {
      * <i>To</i> rule.
      */
     @XmlEnumValue("to")
-    TO("to");
+    TO("to"),
+
+    /**
+     * <i>Keyword</i> rule.
+     */
+    @XmlEnumValue("keyword")
+    KEYWORD("keyword");
 
     @XmlTransient
     private final String value;
