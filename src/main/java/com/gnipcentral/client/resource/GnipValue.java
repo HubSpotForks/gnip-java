@@ -19,7 +19,6 @@ public class GnipValue {
     @XmlValue
     private String value;
     @XmlAttribute(name = "metaURL")
-    @XmlSchemaType(name = "anyURI")
     private String metaUrl;
     
     protected GnipValue() {

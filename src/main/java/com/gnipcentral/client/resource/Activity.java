@@ -49,7 +49,6 @@ public class Activity implements Resource {
     @XmlElement
     private String activityID;
     @XmlElement(name = "URL")
-    @XmlSchemaType(name = "anyURI")
     private String url;
     @XmlElement(name = "source", type = String.class)
     private List<String> sources;

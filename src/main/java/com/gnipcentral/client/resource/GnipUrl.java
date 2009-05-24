@@ -17,10 +17,8 @@ import javax.xml.bind.annotation.*;
 public class GnipUrl {
     
     @XmlValue
-    @XmlSchemaType(name = "anyURI")
     private String url;
     @XmlAttribute(name = "metaURL")
-    @XmlSchemaType(name = "anyURI")
     private String metaUrl;
     
     @SuppressWarnings("unused")

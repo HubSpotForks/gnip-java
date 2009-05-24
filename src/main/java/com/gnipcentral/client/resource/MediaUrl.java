@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.*;
 public class MediaUrl {
     
     @XmlValue
-    @XmlSchemaType(name = "anyURI")
     private String url;
     @XmlAttribute
     private String width;
