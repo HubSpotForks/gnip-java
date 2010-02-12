@@ -42,7 +42,13 @@ public enum RuleType {
      * <i>Keyword</i> rule.
      */
     @XmlEnumValue("keyword")
-    KEYWORD("keyword");
+    KEYWORD("keyword"),
+
+    /**
+     * <i>Action</i> rule.
+     */
+    @XmlEnumValue("action")
+    ACTION("action");
 
     @XmlTransient
     private final String value;
