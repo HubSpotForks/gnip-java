@@ -20,7 +20,10 @@ import javax.xml.bind.annotation.*;
 public class Actor extends GnipValue {
 
     @XmlAttribute
-    private String uid;    
+    private String uid; 
+    
+    @XmlAttribute
+    private String metaUrl;
     
     @SuppressWarnings("unused")
     private Actor() {
@@ -45,6 +48,7 @@ public class Actor extends GnipValue {
     public Actor(String value, String uid, String metaUrl) {
         super(value, metaUrl);
         this.uid = uid;
+        this.metaUrl = metaUrl;
     }
     
     /**
@@ -86,5 +90,21 @@ public class Actor extends GnipValue {
         int result = super.hashCode();
         result = 31 * result + (uid != null ? uid.hashCode() : 0);
         return result;
+    }
+
+    /**
+     * @return the metaUrl
+     */
+    @Override
+    public String getMetaUrl() {
+        return metaUrl;
+    }
+
+    /**
+     * @param metaUrl the metaUrl to set
+     */
+    @Override
+    public void setMetaUrl(String metaUrl) {
+        this.metaUrl = metaUrl;
     }
 }
