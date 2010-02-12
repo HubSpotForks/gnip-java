@@ -24,7 +24,7 @@ public class Translator {
         try {
             context = JAXBContext.newInstance(Activities.class, Activity.class, Error.class, Publishers.class,
                                               Publisher.class, Filter.class, Rule.class, Rules.class, Payload.class,
-                                              Result.class);
+                                              Result.class, Results.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -60,6 +60,26 @@ public class Translator {
         return (Activities) getUnmarshaller().unmarshal(input);
     }
 
+    /**
+     * Parse {@link Activities} from an {@link InputSource}.
+     * @param input the XML input
+     * @return the model object
+     * @throws JAXBException if an error occurs unmarshalling the object from XML
+     */
+    public static Results parseResults(InputSource input) throws JAXBException {
+        return (Results) getUnmarshaller().unmarshal(input);
+    }
+
+    /**
+     * Parse {@link Activities} from an {@link InputStream}.
+     * @param input the XML input
+     * @return the model object
+     * @throws JAXBException if an error occurs unmarshalling the object from XML
+     */
+    public static Results parseResults(InputStream input) throws JAXBException {
+        return (Results) getUnmarshaller().unmarshal(input);
+    }
+    
     /**
      * Parse a {@link Filter} from an {@link InputStream}.
      * @param input the XML input

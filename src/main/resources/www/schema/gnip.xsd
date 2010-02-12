@@ -11,6 +11,19 @@
             <xs:attribute name="publisher" type="uriSafeType" use="optional"/>
         </xs:complexType>
     </xs:element>
+    
+    <!-- Root element of results of activities -->
+    <xs:element name="results">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="pollResponseCode" minOccurs="0"/>
+                <xs:element ref="pollResponseMessage" minOccurs="0"/>
+                <xs:element ref="count" minOccurs="0"/>
+                <xs:element ref="uniqueCount" minOccurs="0"/>
+                <xs:element ref="activity" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
     <!-- Root element of representations of a single filter. -->
     <xs:element name="filter">
@@ -50,6 +63,11 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="pollResponseCode" type="xs:string"/>
+    <xs:element name="pollResponseMessage" type="xs:string"/>
+    <xs:element name="count" type="xs:string"/>
+    <xs:element name="uniqueCount" type="xs:string"/>
 
     <!--
     Root element of Error responses from Gnip.  A human readable
@@ -227,6 +245,7 @@
             <xs:enumeration value="regarding"/>
             <xs:enumeration value="source"/>
             <xs:enumeration value="keyword"/>
+            <xs:enumeration value="action"/>
         </xs:restriction>
     </xs:simpleType>
 
