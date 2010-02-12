@@ -34,6 +34,7 @@ public class GnipTestCase extends BaseTestCase {
     protected Activity activity2;
     protected Activity activity3;
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         
@@ -84,6 +85,7 @@ public class GnipTestCase extends BaseTestCase {
         LOG.log("Test setUp() end\n");
     }
 
+    @Override
     protected void tearDown() throws Exception {
         LOG.log("Test tearDown() start\n");
         // sleep between tests

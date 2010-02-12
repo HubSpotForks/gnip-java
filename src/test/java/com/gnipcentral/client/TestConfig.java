@@ -26,7 +26,7 @@ final class TestConfig {
             throw new RuntimeException("Unable to load properties file for test.", e);
         }
         finally {
-            try{if(is != null) is.close();}catch(IOException ignore) {}
+            try{if(is != null) is.close();}catch(IOException ignore) {/* intentionally blank */}
         }
 
         testConfig = new TestConfig(

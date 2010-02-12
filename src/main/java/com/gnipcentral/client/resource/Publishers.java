@@ -20,6 +20,7 @@ public class Publishers implements Resource {
      * Basic constructor.
      */
     public Publishers() {
+        //Empty constructor
     }
 
     /**

@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class FilterTestCase extends GnipTestCase {
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         config.setTunnelOverPost(false);

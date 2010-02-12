@@ -23,6 +23,7 @@ public class Activities implements Resource {
      * Default constructor.
      */
     public Activities() {
+        //Empty constructor
     }
 
     /**

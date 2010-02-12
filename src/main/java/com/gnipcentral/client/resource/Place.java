@@ -38,6 +38,7 @@ public class Place {
      * Create an empty Place object.
      */
     public Place() {
+        //Empty constructor
     }
     
     /**

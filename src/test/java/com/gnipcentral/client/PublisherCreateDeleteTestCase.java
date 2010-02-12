@@ -4,6 +4,7 @@ import com.gnipcentral.client.resource.*;
 
 public class PublisherCreateDeleteTestCase extends GnipTestCase
 {
+    @Override
     protected void setUp() throws Exception {
         // suppress setup of publisher, activities, and filters
         setupLocalPublisher = false;
@@ -17,14 +18,17 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
             gnipConnection.delete(PublisherScope.MY, "test-create-delete-publisher");
             waitForServerWorkToComplete();
         } catch (GnipException e) {
+            // fail quietly
         }
     }
     
+    @Override
     protected void tearDown() throws Exception {
         // ensure transient publishers are deleted
         try {
             gnipConnection.delete(PublisherScope.MY, "test-create-delete-publisher");
         } catch (GnipException e) {
+            // fail quietly
         }
 
         // tear down test case
@@ -37,6 +41,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
             gnipConnection.getPublisher(PublisherScope.MY, "test-create-delete-publisher");
             fail("Unexpected successful access to publisher that should not exist");
         } catch (GnipException e) {
+            // fail quietly
         }
         
         // dynamically create new publisher
@@ -78,6 +83,7 @@ public class PublisherCreateDeleteTestCase extends GnipTestCase
             gnipConnection.getPublisher(PublisherScope.MY, "test-create-delete-publisher");
             fail("Unexpected successful access to publisher that should have been deleted");
         } catch (GnipException e) {
+            // fail quietly
         }
     }
 }

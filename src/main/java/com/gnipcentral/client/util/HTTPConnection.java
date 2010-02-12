@@ -53,7 +53,7 @@ public class HTTPConnection {
             System.err.println("Unable to load version number for the Gnip client library.  Exception: " + e);
         }
         finally {
-            try{if(is != null) is.close();}catch(IOException ignore) {} 
+            try{if(is != null) is.close();}catch(IOException ignore) {/*Fail quietly*/} 
             USER_AGENT_STRING = "Gnip-Client-Java/" + (v != null ? v : "build");
         }
     }
@@ -225,9 +225,10 @@ public class HTTPConnection {
         try {
             urlConnection.connect();
             InputStream stream = urlConnection.getInputStream();
-            while (stream.read() != -1);
+            while (stream.read() != -1) {/* no operations */}
             IOUtils.closeQuietly(stream);
         } catch (FileNotFoundException e) {
+            //Fail quietly
         }
         urlConnection.disconnect();
     }

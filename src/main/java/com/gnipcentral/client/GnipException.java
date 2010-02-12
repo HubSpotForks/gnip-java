@@ -26,6 +26,7 @@ public class GnipException extends Exception {
         super(message, cause);
     }
 
+    @Override
     public String toString() {
         if (getCause() != null) {
             return super.toString()+", ("+getCause().toString()+")";

@@ -19,6 +19,7 @@ public class Rules implements Resource {
      * Default constructor.
      */
     public Rules() {
+        //Empty constructor
     }
 
     /**

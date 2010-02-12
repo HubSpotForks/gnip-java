@@ -20,6 +20,7 @@ public abstract class Logger {
      * Default constructor.
      */
     Logger() {
+        //Empty constructor
     }
 
     /**
@@ -64,7 +65,8 @@ public abstract class Logger {
         }
 
         @Override
-        public final void log(Object object, Object ... args) {
+        public final void log(@SuppressWarnings("unused") Object object, @SuppressWarnings("unused") Object ... args) {
+            // Noop method
         }
     }
 

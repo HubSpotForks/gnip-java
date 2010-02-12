@@ -55,12 +55,13 @@ class ServiceLoader {
         } catch(ClassNotFoundException e) {
             System.err.println("Exception occurred loading service implementations for service " + service.getName() + ".  Cause: " + e.getMessage());
         } finally {
-            try{if(is != null) is.close();} catch(IOException ignore) {}
-            try{if(r != null) r.close();} catch(IOException ignore) {}
+            try{if(is != null) is.close();} catch(IOException ignore) {/* fail quietly */}
+            try{if(r != null) r.close();} catch(IOException ignore) {/* fail quietly */}
         }
 
         if(classes == null)
             return Collections.emptyList();
-        else return classes; 
+        
+        return classes; 
     }
 }
