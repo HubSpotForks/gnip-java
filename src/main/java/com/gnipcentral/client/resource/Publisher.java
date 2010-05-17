@@ -28,10 +28,7 @@ public class Publisher implements Resource {
     @XmlElementWrapper(name="supportedRuleTypes")
     @XmlElement(name = "type", required = true)
     private Set<RuleType> ruleTypes;
-    
-    @XmlTransient
-    private PublisherScope scope;
-    
+        
     @SuppressWarnings("unused")
     private Publisher() {
         // private ctor for jaxb
@@ -42,15 +39,11 @@ public class Publisher implements Resource {
      * @param scope the required scope of the publisher
      * @param name the required name of the publisher
      */
-    public Publisher(PublisherScope scope, String name) {
-        if (scope == null) {
-            throw new IllegalArgumentException("Invalid scope specified '"+scope+"'");
-        }
+    public Publisher(String name) {
         if (name == null) {
             throw new IllegalArgumentException("Invalid name specified '"+name+"'");
         }
 
-        this.scope = scope;
         this.name = name;
     }
 
@@ -63,8 +56,8 @@ public class Publisher implements Resource {
      * @param name the required publisher's name
      * @param ruleTypes the publisher's rule types
      */
-    public Publisher(PublisherScope scope, String name, Set<RuleType> ruleTypes) {
-        this(scope, name);
+    public Publisher(String name, Set<RuleType> ruleTypes) {
+        this(name);
         this.ruleTypes = ruleTypes;
     }
 
@@ -77,8 +70,8 @@ public class Publisher implements Resource {
      * @param name the required publisher's name
      * @param ruleTypes the publisher's rule types
      */
-    public Publisher(PublisherScope scope, String name, RuleType ... ruleTypes) {
-        this(scope, name);
+    public Publisher(String name, RuleType ... ruleTypes) {
+        this(name);
         this.ruleTypes = new HashSet<RuleType>(ruleTypes.length);
         for(RuleType ruleType : ruleTypes) {
             this.ruleTypes.add(ruleType);
@@ -99,22 +92,6 @@ public class Publisher implements Resource {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Retrieves the scope of this publisher.
-     * @return the scope of the publisher
-     */
-    public PublisherScope getScope() {
-        return scope;
-    }
-
-    /**
-     * Set the scope of this publisher.
-     * @param the scope of the publisher
-     */
-    public void setScope(PublisherScope scope) {
-        this.scope = scope;
     }
 
     /**
@@ -186,7 +163,6 @@ public class Publisher implements Resource {
 
         if (name != null ? !name.equals(publisher.name) : publisher.name != null) return false;
         if (ruleTypes != null ? !ruleTypes.equals(publisher.ruleTypes) : publisher.ruleTypes != null) return false;
-        if (scope != null ? !scope.equals(publisher.scope) : publisher.scope != null) return false;
 
         return true;
     }
@@ -198,7 +174,6 @@ public class Publisher implements Resource {
     public int hashCode() {
         int result = (name != null ? name.hashCode() : 0);
         result = 31 * result + (ruleTypes != null ? ruleTypes.hashCode() : 0);
-        result = 31 * result + (scope != null ? scope.hashCode() : 0);
         return result;
     }
 }

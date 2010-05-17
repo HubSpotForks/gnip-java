@@ -1,19 +1,19 @@
 package com.gnipcentral.client.util;
 
-import com.gnipcentral.client.Config;
-import com.gnipcentral.client.resource.Error;
-import com.gnipcentral.client.resource.Translator;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
-
-import javax.xml.bind.JAXBException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.zip.GZIPInputStream;
 import java.util.Properties;
-import java.util.Date;
+import java.util.zip.GZIPInputStream;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+
+import com.gnipcentral.client.Config;
 
 /**
  * Basic abstraction atop an HTTP connection that is used to handle low-level Gnip <> HTTP protocol interaction.
@@ -69,30 +69,6 @@ public class HTTPConnection {
     }
 
     /**
-     * Send a HTTP request of type HEAD to get the Date HTTP
-     * response header which can be used to access the time on
-     * the remote server. Then, compare that to the local time
-     * on this system to determine the time offset in milliseconds.
-     * @return current server time delta in milliseconds.
-     */
-    public long getServerTimeDelta() throws IOException {
-        // setup GET request to server root URL
-        String serverRootUrlString = config.getGnipServer() + "/";
-        HttpURLConnection urlConnection = getConnection(serverRootUrlString, HTTPMethod.GET);
-        LOG.log("HTTP GET to %s\n", serverRootUrlString);
-        // save local system time
-        long localSystemTime = System.currentTimeMillis();
-        // make request to server, but ignore response
-        dumpData(urlConnection);
-        // adjust local system time
-        localSystemTime = (localSystemTime + System.currentTimeMillis()) / 2;
-        // use HTTP Date response header to access remote server time
-        long remoteServerTime = urlConnection.getDate();
-        return (remoteServerTime != 0L ? remoteServerTime - localSystemTime : 0L);
-    }
-    
-
-    /**
      * Send an HTTP request of type GET to the given URL.
      * @param urlString the URL to receive the GET
      * @return the {@link InputStream} from the response
@@ -102,100 +78,6 @@ public class HTTPConnection {
         HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.GET);
         LOG.log("HTTP GET to %s\n", urlString);
         return getData(urlConnection);
-    }
-
-    /**
-     * Send an HTTP request of type POST to the given URL with the given data for the request body.
-     * @param urlString the URL to receive the POST
-     * @param data the bytes to send in the request body
-     * @return the {@link InputStream} from the response
-     * @throws IOException if an exception occurs communicating with the server
-     */
-    public InputStream doPost(String urlString, byte[] data) throws IOException {
-        HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.POST);
-        LOG.log("HTTP POST to %s\n", urlString);
-        if(!config.isUseGzip())
-            LOG.log("with data\n  %s\n", data != null ? new String(data) : "");
-        return transferData(data, urlConnection);
-    }
-
-    /**
-     * Send an HTTP request of type PUT to the given URL with the given data for the request body.
-     * @param urlString the URL to receive the PUT
-     * @param data the bytes to send in the request body
-     * @return the {@link InputStream} from the response
-     * @throws IOException if an exception occurs communicating with the server
-     */
-    public InputStream doPut(String urlString, byte[] data) throws IOException {
-        HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.PUT);
-        LOG.log("HTTP PUT to %s\n", urlString);
-        if(!config.isUseGzip())
-            LOG.log("with data\n  %s\n", new String(data));
-        return transferData(data, urlConnection);
-    }
-
-    /**
-     * Send an HTTP request of type DELETE to the given URL.
-     * @param urlString the URL to receive the DELETE
-     * @return the {@link InputStream} from the response
-     * @throws IOException if an exception occurs communicating with the server
-     */
-    public InputStream doDelete(String urlString) throws IOException {
-        HttpURLConnection urlConnection = getConnection(urlString, HTTPMethod.DELETE);
-        LOG.log("HTTP DELETE to %s\n", urlString);
-        return getData(urlConnection);
-    }
-
-    private InputStream transferData(byte[] data, HttpURLConnection urlConnection) throws IOException {
-        urlConnection.setDoOutput(true);
-        urlConnection.setFixedLengthStreamingMode(data == null ? 0 : data.length);
-
-        LOG.log("Starting data transfer at %s\n", (new Date()).toString());
-        urlConnection.connect();
-
-        if(data != null) {
-            OutputStream out = urlConnection.getOutputStream();
-            IOUtils.copy(new ByteArrayInputStream(data), out);
-            out.flush();
-        }
-        LOG.log("Finished data transfer at %s\n", (new Date()).toString());
-        LOG.log("Awaiting server response...\n");
-
-        int responseCode = urlConnection.getResponseCode();
-        LOG.log("Received response with response code %d\n", responseCode);
-
-        if (responseCode != HttpURLConnection.HTTP_OK) {
-            String responseMessage = urlConnection.getResponseMessage();
-            String errorMessage = "";
-            try {
-                InputStream errorStream = urlConnection.getErrorStream();
-                if (errorStream != null) {
-                    Error error = Translator.parseError(urlConnection.getErrorStream());
-                    errorMessage = error.getMessage();
-                }
-            }
-            catch(JAXBException e) {
-                LOG.log("Exception occurred unmarshalling error message %s\n", e.toString());
-            }
-            throw new IOException("Error with request code: " + responseCode + " message: " + responseMessage + " " + errorMessage);
-        }
-        
-        LOG.log("Starting data read at %s\n", (new Date()).toString());
-        InputStream resultStream;
-        InputStream stream;
-        String contentEncoding = urlConnection.getHeaderField("Content-Encoding");
-        if ("gzip".equalsIgnoreCase(contentEncoding)) {
-            stream = new GZIPInputStream(urlConnection.getInputStream());
-        } else {
-            stream = urlConnection.getInputStream();
-        }
-        ByteArrayOutputStream resultData = new ByteArrayOutputStream();
-        IOUtils.copy(stream, resultData);
-        resultStream = new ByteArrayInputStream(resultData.toByteArray());
-        urlConnection.disconnect();
-        LOG.log("Finished data read at %s\n", (new Date()).toString());
-        
-        return resultStream;
     }
 
     private InputStream getData(HttpURLConnection urlConnection) throws IOException {
@@ -219,18 +101,6 @@ public class HTTPConnection {
 
         urlConnection.disconnect();
         return resultStream;
-    }
-
-    private void dumpData(HttpURLConnection urlConnection) throws IOException {
-        try {
-            urlConnection.connect();
-            InputStream stream = urlConnection.getInputStream();
-            while (stream.read() != -1) {/* no operations */}
-            IOUtils.closeQuietly(stream);
-        } catch (FileNotFoundException e) {
-            //Fail quietly
-        }
-        urlConnection.disconnect();
     }
 
     private HttpURLConnection getConnection(String urlString, HTTPMethod method) throws IOException {

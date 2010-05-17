@@ -22,6 +22,10 @@
                 <xs:element ref="uniqueCount" minOccurs="0"/>
                 <xs:element ref="activity" maxOccurs="unbounded" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="data_collector_id" use="optional"/>
+            <xs:attribute name="publisher" use="optional"/>
+            <xs:attribute name="endpoint" use="optional"/>
+            <xs:attribute name="refreshURL" use="optional"/>
         </xs:complexType>
     </xs:element>
 

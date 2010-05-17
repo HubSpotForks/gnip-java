@@ -4,7 +4,7 @@
     <groupId>com.gnipcentral</groupId>
     <artifactId>gnip-client</artifactId>
     <packaging>jar</packaging>
-    <version>2.2</version>
+    <version>3.0</version>
     <name>gnip-client</name>
     <url>http://www.gnipcentral.com</url>
     <dependencies>

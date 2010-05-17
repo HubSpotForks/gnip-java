@@ -7,8 +7,8 @@ import java.util.List;
 import javax.xml.bind.annotation.*;
 
 /**
- * Container class that wraps a set of {@link Activity} instances that will be sent to a Gnip server
- * or were read from a Gnip server.
+ * Container class that wraps a set of {@link Activity} instances that will be sent to a Gnip server or were read from a
+ * Gnip server.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "results")
@@ -24,19 +24,29 @@ public class Results implements Resource {
     private String count;
     @XmlElement(name = "uniqueCount")
     private String uniqueCount;
+    @XmlElement(name = "data_collector_id")
+    private String dataCollectorId;
+    @XmlElement(name = "publisher")
+    private String publisher;
+    @XmlElement(name = "endpoint")
+    private String endPoint;
+    @XmlElement(name = "refreshURL")
+    private String refreshUrl;
 
     /**
      * Default constructor.
      */
     public Results() {
-        //Empty constructor
+        // Empty constructor
     }
 
     /**
-     * Construct an {@link Activities} instance with a set of {@link com.gnipcentral.client.resource.Activity activities}.
+     * Construct an {@link Results} instance with a set of {@link com.gnipcentral.client.resource.Activity
+     * activities}.
+     * 
      * @param activities
      */
-    public Results(Activity ... activities) {
+    public Results(Activity... activities) {
         this.activities = new ArrayList<Activity>();
         for (Activity activity : activities) {
             this.activities.add(activity);
@@ -45,6 +55,7 @@ public class Results implements Resource {
 
     /**
      * Retrieves a list of activities.
+     * 
      * @return the list of activities
      */
     public List<Activity> getActivities() {
@@ -53,7 +64,9 @@ public class Results implements Resource {
 
     /**
      * Set the list of activities.
-     * @param activities the list of activities
+     * 
+     * @param activities
+     *            the list of activities
      */
     public void setActivities(List<Activity> activities) {
         this.activities = activities;
@@ -61,6 +74,7 @@ public class Results implements Resource {
 
     /**
      * Retrieves whether this activities object has one or more activity instances.
+     * 
      * @return <code>true</code> if this contains activities; <code>false</code> otherwise
      */
     public boolean isEmpty() {
@@ -69,7 +83,9 @@ public class Results implements Resource {
 
     /**
      * Add an activity to the list of activities.
-     * @param activity the activity to add
+     * 
+     * @param activity
+     *            the activity to add
      * @return a reference to this object
      */
     public Results add(Activity activity) {
@@ -81,8 +97,10 @@ public class Results implements Resource {
     }
 
     /**
-     * Add all of the activities from another {@link Activities} object.
-     * @param activities the activities to add
+     * Add all of the activities from another {@link Results} object.
+     * 
+     * @param activities
+     *            the activities to add
      * @return a reference to this object
      */
     public Results addAll(Results activities) {
@@ -97,7 +115,9 @@ public class Results implements Resource {
 
     /**
      * Add all of the activities from a {@link List} of activities.
-     * @param activities the collection of activities to add
+     * 
+     * @param activities
+     *            the collection of activities to add
      * @return a reference to this object
      */
     public Results addAll(Collection<Activity> activities) {
@@ -118,7 +138,8 @@ public class Results implements Resource {
     }
 
     /**
-     * @param pollResponseCode the pollResponseCode to set
+     * @param pollResponseCode
+     *            the pollResponseCode to set
      */
     public void setPollResponseCode(String pollResponseCode) {
         this.pollResponseCode = pollResponseCode;
@@ -132,7 +153,8 @@ public class Results implements Resource {
     }
 
     /**
-     * @param pollResponseMessage the pollResponseMessage to set
+     * @param pollResponseMessage
+     *            the pollResponseMessage to set
      */
     public void setPollResponseMessage(String pollResponseMessage) {
         this.pollResponseMessage = pollResponseMessage;
@@ -146,7 +168,8 @@ public class Results implements Resource {
     }
 
     /**
-     * @param count the count to set
+     * @param count
+     *            the count to set
      */
     public void setCount(String count) {
         this.count = count;
@@ -160,9 +183,42 @@ public class Results implements Resource {
     }
 
     /**
-     * @param uniqueCount the uniqueCount to set
+     * @param uniqueCount
+     *            the uniqueCount to set
      */
     public void setUniqueCount(String uniqueCount) {
         this.uniqueCount = uniqueCount;
+    }
+
+    public String getDataCollectorId() {
+        return dataCollectorId;
+    }
+
+    public void setDataCollectorId(String dataCollectorId) {
+        this.dataCollectorId = dataCollectorId;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getEndPoint() {
+        return endPoint;
+    }
+
+    public void setEndPoint(String endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public String getRefreshUrl() {
+        return refreshUrl;
+    }
+
+    public void setRefreshUrl(String refreshUrl) {
+        this.refreshUrl = refreshUrl;
     }
 }

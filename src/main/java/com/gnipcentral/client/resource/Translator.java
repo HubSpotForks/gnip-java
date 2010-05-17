@@ -1,16 +1,15 @@
 package com.gnipcentral.client.resource;
 
-import org.xml.sax.InputSource;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.nio.charset.Charset;
+
+import org.xml.sax.InputSource;
 
 /**
  * A translation abstraction for converting between Gnip's Java model objects and XML in the form of strings and streams.
@@ -22,42 +21,10 @@ public class Translator {
 
     static {
         try {
-            context = JAXBContext.newInstance(Activities.class, Activity.class, Error.class, Publishers.class,
-                                              Publisher.class, Filter.class, Rule.class, Rules.class, Payload.class,
-                                              Result.class, Results.class);
+            context = JAXBContext.newInstance(Error.class, Results.class);
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Parse an {@link Activity} from a {@link String}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Activity parseActivity(String input) throws JAXBException {
-        return (Activity) getUnmarshaller().unmarshal(new ByteArrayInputStream(input.getBytes(Charset.forName("UTF-8"))));
-    }
-
-    /**
-     * Parse {@link Activities} from an {@link InputSource}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Activities parseActivities(InputSource input) throws JAXBException {
-        return (Activities) getUnmarshaller().unmarshal(input);
-    }
-
-    /**
-     * Parse {@link Activities} from an {@link InputStream}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Activities parseActivities(InputStream input) throws JAXBException {
-        return (Activities) getUnmarshaller().unmarshal(input);
     }
 
     /**
@@ -78,56 +45,6 @@ public class Translator {
      */
     public static Results parseResults(InputStream input) throws JAXBException {
         return (Results) getUnmarshaller().unmarshal(input);
-    }
-    
-    /**
-     * Parse a {@link Filter} from an {@link InputStream}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Filter parseFilter(InputSource input) throws JAXBException {
-        return (Filter) getUnmarshaller().unmarshal(input);
-    }
-
-    /**
-     * Parse a {@link Publisher} from an {@link InputSource}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Publisher parsePublisher(InputSource input) throws JAXBException {
-        return (Publisher) getUnmarshaller().unmarshal(input);
-    }
-
-    /**
-     * Parse {@link Publishers} from an {@link InputSource}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Publishers parsePublishers(InputSource input) throws JAXBException {
-        return (Publishers) getUnmarshaller().unmarshal(input);
-    }
-
-    /**
-     * Parse a {@link Resource} from a {@link InputStream}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Resource parseResource(InputStream input) throws JAXBException {
-        return (Resource) getUnmarshaller().unmarshal(input);
-    }
-
-    /**
-     * Parse a {@link Result} from a {@link InputStream}.
-     * @param input the XML input
-     * @return the model object
-     * @throws JAXBException if an error occurs unmarshalling the object from XML
-     */
-    public static Result parseResult(InputStream input) throws JAXBException {
-        return (Result) getUnmarshaller().unmarshal(input);
     }
 
     /**
