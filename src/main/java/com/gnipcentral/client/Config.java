@@ -20,10 +20,10 @@ public class Config {
     public static final int DEFAULT_READ_TIMEOUT_SECONDS = 2;
 
     private boolean useGzip = false;
-    private boolean tunnelOverPost = false;
     private String username;
     private String password;
     private String gnipServer;
+    private String currentGnipUrl;
     private int readTimeoutMillis = DEFAULT_READ_TIMEOUT_SECONDS * 1000;
 
     /**
@@ -105,26 +105,6 @@ public class Config {
     }
 
     /**
-     * Configure the setting that controls whether the HTTP PUT and DELETE are
-     * sent to the server by tunneling them through an HTTP POST.  This setting
-     * can be useful when a network configuration disallows directly sending PUT
-     * and DELETE requests.  The default for this setting is <code>false</code>.
-     * @param tunnelOverPost
-     */
-    public void setTunnelOverPost(boolean tunnelOverPost) {
-        this.tunnelOverPost = tunnelOverPost;
-    }
-
-    /**
-     * Retrieves the tunnel over post flag.  The default value is <code>false</code>.
-     *
-     * @return 
-     */
-    public boolean isTunnelOverPost() {
-        return tunnelOverPost;
-    }
-
-    /**
      * Configure the setting that controls whether HTTP requests and responses use
      * the the <code>gzip</code> encoding which is set using the <code>Content-Encoding</code>
      * and the <code>Accept-Encoding</code> HTTP headers.
@@ -140,5 +120,24 @@ public class Config {
      */
     public boolean isUseGzip() {
         return useGzip;
+    }
+
+    /**
+     * Gets the current url to ping for activities
+     * @return a string url
+     */
+    public synchronized String getCurrentGnipUrl() {
+        if (currentGnipUrl == null) {
+            currentGnipUrl = gnipServer;
+        }
+        return currentGnipUrl;
+    }
+
+    /**
+     * Sets the current url to ping for activities
+     * @param currentGnipUrl
+     */
+    public synchronized void setCurrentGnipUrl(String currentGnipUrl) {
+        this.currentGnipUrl = currentGnipUrl;
     }
 }
